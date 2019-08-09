@@ -1,5 +1,5 @@
 ---
-name: Website issue or suggestion
+name: Website Issue or Suggestion
 about: Found something wrong with the webpages? Let us know
 title: "[Website]"
 labels: ''
