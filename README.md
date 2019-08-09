@@ -4,7 +4,7 @@ This is a place to discuss the UCR and UEA time series classification archives h
 
 We will document all changes on the Wiki page, and update this repo with more info when we get time
 
-Java TSC code is int the tsml repo
+Java TSC code is in the tsml repo
 https://github.com/uea-machine-learning/tsml
 
 sklearn contains equivalent python classifiers (plus lots more!)
