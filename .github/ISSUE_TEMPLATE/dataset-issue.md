@@ -1,7 +1,7 @@
 ---
 name: Dataset Issue
 about: Have a problem or a query about a particular dataset or datasets? Ask away
-title: ''
+title: "[ISSUE]"
 labels: ''
 assignees: ''
 
