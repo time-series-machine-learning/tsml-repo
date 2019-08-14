@@ -7,7 +7,7 @@ We will document all changes on the Wiki page, and update this repo with more in
 Java TSC code is in the tsml repo
 https://github.com/uea-machine-learning/tsml
 
-sklearn contains equivalent python classifiers (plus lots more!)
+sktime contains equivalent python classifiers (plus lots more!)
 https://github.com/alan-turing-institute/sktime/wiki
 
 
