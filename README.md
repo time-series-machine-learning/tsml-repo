@@ -8,6 +8,6 @@ Java TSC code is in the tsml repo
 https://github.com/uea-machine-learning/tsml
 
 sktime contains equivalent python classifiers (plus lots more!)
-https://github.com/alan-turing-institute/sktime/wiki
+https://github.com/alan-turing-institute/sktime/
 
 
