@@ -13,7 +13,7 @@
 |InsectWingbeat   |50,000          |600                |10            |6,000             |0.10         |
 |MosquitoWingbeat |279,566         |3,750              |6             |6,000             |0.63         |
 
-# General time series datasets
+# General time series datasets (No missing values)
 
 | Dataset name                   | Num. Instances | Num. of attributes | Num. classes | Type         |
 |--------------------------------|----------------|--------------------|--------------|--------------|
