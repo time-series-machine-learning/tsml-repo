@@ -6,11 +6,12 @@ We will document all changes on the Wiki page, and update this repo with more in
 
 aeon contains equivalent python classifiers and clusterers that can be used on these data, and code to automatically download the data
 
+```python
 from aeon.datasets import load_classification
 X, y, meta_data = load_classification("GunPoint")
 print(" Shape of X = ", X.shape)
 print(" Meta data = ", meta_data)
-
+```
 Java TSC code is in the tsml repo
 
 https://github.com/uea-machine-learning/tsml
