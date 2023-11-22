@@ -1,11 +1,16 @@
 # Time Series Machine Learning Repository
 
-This is a place to discuss the UCR and UEA time series classification archives hosted at https://www.timeseriesclassification.com/. If you use the archives, please star this repo. If you want to donate data or have any problems with data in the archive, please raise an issue.
+This is a place to discuss the UCR and UEA time series classification archives hosted at <a = href="https://www.timeseriesclassification.com/"> tsc.com</a>. If you use the archives, please star this repo. If you want to donate data or have any problems with data in the archive, please raise an issue.
 
 We will document all changes on the Wiki page, and update this repo with more info when we get time
 
 aeon contains equivalent python classifiers and clusterers that can be used on these data, and code to automatically download the data
 
+```python
+from aeon.datasets import load_classification
+```
+
+or you can automatically download and load into memory:
 ```python
 from aeon.datasets import load_classification
 X, y, meta_data = load_classification("GunPoint")
