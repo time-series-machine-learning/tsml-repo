@@ -2,10 +2,6 @@
 
 Browse and download published datasets from the [TSML community on Zenodo](https://zenodo.org/communities/tsml/records). Use the [issue tracker](https://github.com/time-series-machine-learning/tsml-repo/issues/new/choose) to suggest a dataset, report an archive problem, or give feedback on the website.
 
-The [catalogue manifests](manifest/) list records, versions, and files. The [Python utilities](python_utilities/) generate these inventories and compute dataset statistics from local files.
-
-The statistics generator checks local TRAIN and TEST files against the current Zenodo version. For ZIP-only datasets, pass the original published ZIP with `--archive` and point the generator at the extracted files.
-
 ## Load and classify a dataset with aeon
 
 Install [aeon](https://www.aeon-toolkit.org/).
@@ -14,17 +10,17 @@ Install [aeon](https://www.aeon-toolkit.org/).
 python -m pip install "aeon>=1.4.0"
 ```
 
-Use the predefined TRAIN and TEST splits of GunPoint to train a ROCKET classifier and measure its accuracy on the test split. The loader can fetch missing archive files from Zenodo and reuse the copies in `extract_path`.
+Use the predefined TRAIN and TEST splits of GunPoint to train HIVE-COTE v2 (HC2) and measure its accuracy on the test split. The loader can fetch missing archive files from Zenodo and reuse the copies in `extract_path`. The example sets a one-minute training contract.
 
 ```python
-from aeon.classification.convolution_based import RocketClassifier
+from aeon.classification.hybrid import HIVECOTEV2
 from aeon.datasets import load_classification
 
 data_dir = "local/tsml-data"
 X_train, y_train = load_classification("GunPoint", split="train", extract_path=data_dir)
 X_test, y_test = load_classification("GunPoint", split="test", extract_path=data_dir)
 
-classifier = RocketClassifier(n_kernels=500, random_state=0)
+classifier = HIVECOTEV2(time_limit_in_minutes=1, random_state=0)
 classifier.fit(X_train, y_train)
 
 print(f"Training data shape (cases, channels, time points): {X_train.shape}")
