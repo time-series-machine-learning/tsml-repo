@@ -2,6 +2,7 @@
 .venv/
 __pycache__/
 .pytest_cache/
+.*.jsonl.lock
 
 local/
 .zenodo_token
