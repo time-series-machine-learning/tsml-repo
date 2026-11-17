@@ -1,12 +1,12 @@
 name: Report a dataset problem
-description: Ask about a dataset or report a problem with an archive file
+description: Raise an issue about an archive dataset
 title: "[Dataset] "
 labels: ["data issue"]
 body:
   - type: textarea
     id: dataset
     attributes:
-      label: Dataset and version
+      label: Dataset
       description: >-
         Provide the dataset name, Zenodo URL or DOI, and affected files or
         variants. If you downloaded it elsewhere, include the source.
@@ -15,7 +15,7 @@ body:
   - type: textarea
     id: problem
     attributes:
-      label: Problem or question
+      label: Issue details
       description: >-
         Describe the issue and what you expected to see. Include the affected
         split, loader and version, and steps to reproduce where applicable.
