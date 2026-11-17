@@ -1,0 +1,35 @@
+name: Propose a dataset
+description: Offer a time series dataset for inclusion in the archive
+title: "[Donation] "
+body:
+  - type: textarea
+    id: dataset
+    attributes:
+      label: Dataset and source
+      description: >-
+        Describe the task, measurements, and target labels or values. Include a
+        link to the data or let us know if the maintainers should contact you.
+    validations:
+      required: true
+  - type: textarea
+    id: licence
+    attributes:
+      label: Licence and redistribution
+      description: >-
+        Link to the dataset licence and describe any conditions on publishing
+        or redistributing the data and derived variants.
+  - type: textarea
+    id: format-and-evaluation
+    attributes:
+      label: Format and evaluation
+      description: >-
+        Describe the channels, series lengths, missing values, and padding.
+        Provide recommended train and test splits and any grouping constraints
+        across subjects, sessions, or devices.
+  - type: textarea
+    id: attribution
+    attributes:
+      label: Publication and attribution
+      description: >-
+        Share related papers, preferred attribution, and any figure the
+        archive has permission to use.

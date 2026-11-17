@@ -1,0 +1,18 @@
+name: Website feedback
+description: Report a broken page or suggest a website improvement
+title: "[Website] "
+body:
+  - type: input
+    id: page
+    attributes:
+      label: Page URL
+      description: Link to the relevant page, if applicable.
+  - type: textarea
+    id: feedback
+    attributes:
+      label: Problem or suggestion
+      description: >-
+        Describe the change you would like to see, or explain what happened
+        and how to reproduce the problem.
+    validations:
+      required: true
