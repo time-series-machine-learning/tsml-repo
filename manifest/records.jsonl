@@ -163,12 +163,12 @@
 {"concept_id": 18682537, "current_record_id": 18682538, "kind": "dataset", "name": "InsectSound", "record_lists": ["monster"], "record_url": "https://zenodo.org/records/18682538"}
 {"concept_id": 11206233, "current_record_id": 21871184, "kind": "dataset", "name": "InsectWingbeat", "record_lists": ["classification-mv", "classification-mv-uea30"], "record_url": "https://zenodo.org/records/21871184"}
 {"concept_id": 11197634, "current_record_id": 11197635, "kind": "dataset", "name": "InsectWingbeatSound", "record_lists": ["classification-uv"], "record_url": "https://zenodo.org/records/11197635"}
-{"concept_id": 18510497, "current_record_id": 18510498, "kind": "dataset", "name": "IRDS-EFL", "record_lists": ["classification-mv"], "record_url": "https://zenodo.org/records/18510498"}
-{"concept_id": 18510500, "current_record_id": 18510501, "kind": "dataset", "name": "IRDS-EFR", "record_lists": ["classification-mv"], "record_url": "https://zenodo.org/records/18510501"}
-{"concept_id": 18510504, "current_record_id": 18510505, "kind": "dataset", "name": "IRDS-SAL", "record_lists": ["classification-mv"], "record_url": "https://zenodo.org/records/18510505"}
-{"concept_id": 18510506, "current_record_id": 18510507, "kind": "dataset", "name": "IRDS-SAR", "record_lists": ["classification-mv"], "record_url": "https://zenodo.org/records/18510507"}
-{"concept_id": 18510508, "current_record_id": 18510509, "kind": "dataset", "name": "IRDS-SFE", "record_lists": ["classification-mv"], "record_url": "https://zenodo.org/records/18510509"}
-{"concept_id": 18510514, "current_record_id": 18510515, "kind": "dataset", "name": "IRDS-SFL", "record_lists": ["classification-mv", "classification-mv-core65"], "record_url": "https://zenodo.org/records/18510515"}
+{"concept_id": 18510497, "current_record_id": 18510498, "kind": "dataset", "name": "IRDS-EFL", "record_lists": ["classification-mv", "rehab"], "record_url": "https://zenodo.org/records/18510498"}
+{"concept_id": 18510500, "current_record_id": 18510501, "kind": "dataset", "name": "IRDS-EFR", "record_lists": ["classification-mv", "rehab"], "record_url": "https://zenodo.org/records/18510501"}
+{"concept_id": 18510504, "current_record_id": 18510505, "kind": "dataset", "name": "IRDS-SAL", "record_lists": ["classification-mv", "rehab"], "record_url": "https://zenodo.org/records/18510505"}
+{"concept_id": 18510506, "current_record_id": 18510507, "kind": "dataset", "name": "IRDS-SAR", "record_lists": ["classification-mv", "rehab"], "record_url": "https://zenodo.org/records/18510507"}
+{"concept_id": 18510508, "current_record_id": 18510509, "kind": "dataset", "name": "IRDS-SFE", "record_lists": ["classification-mv", "rehab"], "record_url": "https://zenodo.org/records/18510509"}
+{"concept_id": 18510514, "current_record_id": 18510515, "kind": "dataset", "name": "IRDS-SFL", "record_lists": ["classification-mv", "classification-mv-core65", "rehab"], "record_url": "https://zenodo.org/records/18510515"}
 {"concept_id": 18510517, "current_record_id": 18510518, "kind": "dataset", "name": "IRDS-SFR", "record_lists": ["classification-mv", "rehab"], "record_url": "https://zenodo.org/records/18510518"}
 {"concept_id": 18510519, "current_record_id": 18510520, "kind": "dataset", "name": "IRDS-STL", "record_lists": ["classification-mv", "rehab"], "record_url": "https://zenodo.org/records/18510520"}
 {"concept_id": 18510521, "current_record_id": 18510522, "kind": "dataset", "name": "IRDS-STR", "record_lists": ["classification-mv", "rehab"], "record_url": "https://zenodo.org/records/18510522"}
