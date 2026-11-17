@@ -1,14 +1,13 @@
 ---
-name: Dataset Issue
-about: Have a problem or a query about a particular dataset or datasets? Ask away
-title: "[ISSUE]"
-labels: ''
-assignees: ''
-
+name: Report a dataset problem
+about: Ask about a dataset or report a problem with an archive file
+title: "[Dataset] "
 ---
 
-**Which dataset/datasets have you an issue with?**
+### Dataset and version
 
-**Where did you download the data from (e.g. UCR or timeseriesclassification.com)? **
+Provide the dataset name, Zenodo URL or DOI, and affected files or variants. If you downloaded the dataset elsewhere, include the source.
 
-**Whats the issue?**
+### Observed problem
+
+Describe the issue and what you expected to see. Include the affected split, loader and version, and steps to reproduce the issue where applicable.

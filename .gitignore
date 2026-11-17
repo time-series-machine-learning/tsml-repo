@@ -1,0 +1,8 @@
+.idea/
+.venv/
+__pycache__/
+.pytest_cache/
+
+local/
+.zenodo_token
+.zenodo_sandbox_token

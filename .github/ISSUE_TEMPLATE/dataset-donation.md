@@ -1,30 +1,17 @@
 ---
-name: Dataset Donation
-about: Wish to donate data to the repo
-title: "[DONATION]"
-labels: ''
-assignees: ''
-
+name: Propose a dataset
+about: Offer a time series dataset for inclusion in the archive
+title: "[Donation] "
 ---
 
-**Please give a brief description of the data**
+### Dataset and source
 
-**Where can we get the data?**
-provide a link or ask us to contact you directly if that is better
+Describe the task, measurements, and target labels or values. Include a link to the data or let us know if the maintainers should contact you. Share related papers, preferred attribution, and any figure we have permission to use.
 
-**Is there a publication related to the data**
-A clear and concise description of any alternative solutions or features you've considered.
+### Licence and permission
 
-**Is your data multivariate or univariate?**
+Link to the dataset licence and describe any conditions on publishing or redistributing the data and derived variants.
 
-**Is there a default train/test split for the data**
-If not, we will create one randomly. If this is inappropriate (e.g. want to avoid test subjects being in both train and test splits) let us know and advise on how we should split
+### Format and evaluation
 
-**Are there any missing values/padding?**
-We do not want to pre pad data. If the series are not equal length, please let us know
-
-**Is there a picture for the data we can put on the website?**
-
-**How would you like the donation attributed on the website?**
-
-**Can you provide a paragraph description, including the meaning of the class values, for the website?**
+Describe the channels, series lengths, missing values, and any padding. Provide the recommended TRAIN and TEST splits and note any grouping constraints across subjects, sessions, or devices.

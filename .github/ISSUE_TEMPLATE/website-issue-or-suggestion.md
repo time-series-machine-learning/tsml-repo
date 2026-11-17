@@ -1,12 +1,9 @@
 ---
-name: Website Issue or Suggestion
-about: Found something wrong with the webpages? Let us know
-title: "[Website]"
-labels: ''
-assignees: ''
-
+name: Website feedback
+about: Report a broken page or suggest a website improvement
+title: "[Website] "
 ---
 
-please note timeseriesclassification.com is maintained when we have time, and none of us are web developers. If you want to help develop it let us know.
+### Page and feedback
 
-**whats the issue or suggestion?**
+Link to the relevant page. Describe the change you would like to see, or explain what happened and how to reproduce the problem.

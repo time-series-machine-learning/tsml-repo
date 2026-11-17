@@ -1,0 +1,108 @@
+{
+  "$id": "https://raw.githubusercontent.com/time-series-machine-learning/tsml-repo/main/manifest/schema/dataset.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "case_counts": {
+      "additionalProperties": false,
+      "properties": {
+        "test": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "train": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "train",
+        "test"
+      ],
+      "type": "object"
+    },
+    "series_length": {
+      "additionalProperties": false,
+      "properties": {
+        "max": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "mean": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "min": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "min",
+        "max"
+      ],
+      "type": "object"
+    },
+    "statistics": {
+      "additionalProperties": false,
+      "properties": {
+        "case_counts": {
+          "$ref": "#/$defs/case_counts"
+        },
+        "missing_value_count": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "n_channels": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "n_classes": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "series_length": {
+          "$ref": "#/$defs/series_length"
+        }
+      },
+      "required": [
+        "case_counts",
+        "n_channels",
+        "missing_value_count",
+        "series_length"
+      ],
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "One concrete dataset variant available from a Zenodo record.",
+  "properties": {
+    "concept_id": {
+      "description": "The Zenodo concept containing the dataset variant.",
+      "minimum": 1,
+      "type": "integer"
+    },
+    "dataset_name": {
+      "description": "The exact dataset or loader identifier, including suffixes.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "statistics": {
+      "$ref": "#/$defs/statistics"
+    },
+    "task": {
+      "description": "The learning task for this concrete dataset variant.",
+      "enum": [
+        "classification",
+        "regression"
+      ]
+    }
+  },
+  "required": [
+    "dataset_name",
+    "concept_id",
+    "task",
+    "statistics"
+  ],
+  "title": "TSML dataset catalogue row",
+  "type": "object"
+}
