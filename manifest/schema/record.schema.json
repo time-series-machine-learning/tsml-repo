@@ -1,0 +1,54 @@
+{
+  "$id": "https://raw.githubusercontent.com/time-series-machine-learning/tsml-repo/master/manifest/schema/record.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "One current Zenodo record and its record-list memberships.",
+  "properties": {
+    "concept_id": {
+      "description": "The Zenodo concept record shared by all versions.",
+      "minimum": 1,
+      "type": "integer"
+    },
+    "current_record_id": {
+      "description": "The current published Zenodo record version.",
+      "minimum": 1,
+      "type": "integer"
+    },
+    "kind": {
+      "description": "A manually assigned dataset or aggregate classification.",
+      "enum": [
+        "dataset",
+        "aggregate"
+      ]
+    },
+    "name": {
+      "description": "The current Zenodo record title.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "record_lists": {
+      "description": "Names of files under record_lists containing the record.",
+      "items": {
+        "pattern": "^[a-z0-9][a-z0-9-]*$",
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "record_url": {
+      "description": "The public page for the current Zenodo record.",
+      "format": "uri",
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "kind",
+    "concept_id",
+    "current_record_id",
+    "record_url",
+    "record_lists"
+  ],
+  "title": "TSML record catalogue row",
+  "type": "object"
+}

@@ -1,0 +1,35 @@
+{
+  "$id": "https://raw.githubusercontent.com/time-series-machine-learning/tsml-repo/master/manifest/schema/zenodo_version.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "concept_id": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "is_current": {
+      "type": "boolean"
+    },
+    "record_id": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "record_url": {
+      "format": "uri",
+      "type": "string"
+    },
+    "title": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "concept_id",
+    "record_id",
+    "title",
+    "is_current",
+    "record_url"
+  ],
+  "title": "TSML Zenodo version snapshot row",
+  "type": "object"
+}
