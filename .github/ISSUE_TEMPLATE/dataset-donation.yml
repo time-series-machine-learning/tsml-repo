@@ -1,5 +1,5 @@
-name: Propose a dataset
-description: Offer a time series dataset for inclusion in the archive
+name: Donate a dataset
+description: Offer data you have permission to share with the archive
 title: "[Donation] "
 labels: ["donation"]
 body:
@@ -8,10 +8,17 @@ body:
     attributes:
       label: Dataset
       description: >-
-        Describe the task, measurements, and target labels or values. Include a
-        link to the data or let us know if the maintainers should contact you.
+        Write a short description for the catalogue. Explain what was measured,
+        the task, and what the class labels or regression targets mean.
     validations:
       required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Source
+      description: >-
+        Link to the data. If it needs to be shared privately, ask the
+        maintainers to contact you.
   - type: textarea
     id: licence
     attributes:
@@ -24,9 +31,17 @@ body:
     attributes:
       label: Dataset structure
       description: >-
-        Describe the channels, series lengths, missing values, and padding.
-        Provide recommended train and test splits and any grouping constraints
-        across subjects, sessions, or devices.
+        State whether the series are univariate or multivariate. Note uneven
+        lengths, missing values, and any existing padding. Please provide the
+        original unpadded series if available.
+  - type: textarea
+    id: splits
+    attributes:
+      label: Train/test split
+      description: >-
+        Say whether the dataset already has a train/test split. If you
+        recommend a new split, note any groups that should stay together,
+        such as cases from the same subject, session, or device.
   - type: textarea
     id: attribution
     attributes:
