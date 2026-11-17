@@ -3,10 +3,12 @@
 import argparse
 import hashlib
 import json
+from contextlib import contextmanager
 from pathlib import Path, PurePosixPath
 from zipfile import ZipFile
 
 import numpy as np
+from filelock import FileLock
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPOSITORY_ROOT = SCRIPT_DIR.parent
@@ -192,18 +194,29 @@ def verify_dataset_files(pairs, record, file_rows, archive_path=None):
         verify_published_file(path, files.get(path.name.casefold()), record_id)
 
 
-def load_ts_file(path):
-    """Load one .ts file through aeon, including its header metadata."""
-    try:
-        from aeon.datasets import load_from_ts_file
-    except ModuleNotFoundError as error:
-        if error.name != "aeon":
-            raise
-        raise ModuleNotFoundError(
-            "aeon is required to generate dataset catalogue rows."
-        ) from error
+@contextmanager
+def open_ts_split(path, loader=None):
+    """Read the header once and decode one case at a time with aeon."""
+    if loader is not None:
+        cases, targets, metadata = loader(path)
+        if len(cases) != len(targets):
+            raise ValueError(f"{path} has {len(cases)} cases but {len(targets)} targets.")
+        yield metadata, zip(cases, targets)
+        return
 
-    return load_from_ts_file(str(path), return_meta_data=True)
+    # Reuse the parsers behind load_from_ts_file without materializing its full array.
+    from aeon.datasets._data_loaders import _load_data, _load_header_info
+
+    with path.open(encoding="utf-8") as stream:
+        metadata = _load_header_info(stream)
+
+        def iter_cases():
+            for line in stream:
+                cases, targets, _ = _load_data((line,), metadata)
+                target = float(targets[0]) if metadata["targetlabel"] else targets[0]
+                yield cases[0], target
+
+        yield metadata, iter_cases()
 
 
 def metadata_task(metadata, path):
@@ -217,81 +230,66 @@ def metadata_task(metadata, path):
     return "classification" if is_classification else "regression"
 
 
-def load_split(path, loader=None):
-    """Load and validate the three values returned for one .ts split."""
-    if loader is None:
-        loader = load_ts_file
-    result = loader(path)
-    if not isinstance(result, tuple) or len(result) != 3:
-        raise ValueError(f"The aeon loader returned an invalid result for {path}.")
-    return result
-
-
-def collection_statistics(collections):
-    """Calculate shape, length, and missing-value statistics across splits."""
+def build_dataset_row(dataset_name, concept_id, pair, loader=None):
+    """Accumulate dataset statistics without holding a full split in memory."""
     case_counts = {}
-    channels = set()
-    lengths = []
+    tasks = set()
+    classes = set()
+    n_channels = None
+    min_length = None
+    max_length = 0
+    total_length = 0
     missing_value_count = 0
 
-    for split, (X, y, _) in collections.items():
-        n_cases = len(X)
-        if len(y) != n_cases:
-            raise ValueError(
-                f"{split.upper()} has {n_cases} cases but {len(y)} targets."
-            )
-        case_counts[split] = n_cases
+    for split in SPLITS:
+        path = pair[split]
+        case_counts[split] = 0
+        split_length = None
+        with open_ts_split(path, loader) as (metadata, cases):
+            task = metadata_task(metadata, path)
+            tasks.add(task)
+            for case, target in cases:
+                values = np.asarray(case)
+                if values.ndim != 2 or not values.shape[0]:
+                    raise ValueError(
+                        f"Expected a case with shape (n_channels, n_timepoints) in {path}."
+                    )
+                channels, length = values.shape
+                if n_channels is None:
+                    n_channels = channels
+                if channels != n_channels or (metadata.get("univariate") and channels != 1):
+                    raise ValueError(f"Inconsistent channel count in {path}.")
+                if split_length is None:
+                    split_length = length
+                if metadata.get("equallength") and length != split_length:
+                    raise ValueError(f"Cases have unequal lengths in equal-length split {path}.")
 
-        for case in X:
-            values = np.asarray(case)
-            if values.ndim != 2:
-                raise ValueError(
-                    "Expected each aeon case to have shape "
-                    "(n_channels, n_timepoints)."
-                )
-            channels.add(int(values.shape[0]))
-            lengths.append(int(values.shape[1]))
-            missing_value_count += int(np.count_nonzero(np.isnan(values)))
+                case_counts[split] += 1
+                min_length = length if min_length is None else min(min_length, length)
+                max_length = max(max_length, length)
+                total_length += length
+                missing_value_count += int(np.count_nonzero(np.isnan(values)))
+                if task == "classification":
+                    classes.add(target)
 
-    if not lengths:
-        raise ValueError("The train/test pair contains no cases.")
-    if len(channels) != 1:
-        raise ValueError("Cases do not all have the same number of channels.")
-
-    return {
-        "case_counts": case_counts,
-        "missing_value_count": missing_value_count,
-        "n_channels": channels.pop(),
-        "series_length": {
-            "min": min(lengths),
-            "max": max(lengths),
-            "mean": sum(lengths) / len(lengths),
-        },
-    }
-
-
-def build_dataset_row(dataset_name, concept_id, pair, loader=None):
-    """Load one pair and build its schema-ready dataset catalogue row."""
-    collections = {
-        split: load_split(pair[split], loader=loader) for split in SPLITS
-    }
-    tasks = {
-        metadata_task(metadata, pair[split])
-        for split, (_, _, metadata) in collections.items()
-    }
     if len(tasks) != 1:
         raise ValueError(f"{dataset_name} TRAIN and TEST declare different tasks.")
+    if n_channels is None:
+        raise ValueError("The train/test pair contains no cases.")
 
     task = tasks.pop()
-    statistics = collection_statistics(collections)
+    statistics = {
+        "case_counts": case_counts,
+        "missing_value_count": missing_value_count,
+        "n_channels": n_channels,
+        "series_length": {
+            "min": min_length,
+            "max": max_length,
+            "mean": total_length / sum(case_counts.values()),
+        },
+    }
     if task == "classification":
-        labels = np.concatenate(
-            [np.asarray(collections[split][1]).reshape(-1) for split in SPLITS]
-        )
-        n_classes = int(np.unique(labels).size)
-        if n_classes == 0:
-            raise ValueError(f"{dataset_name} has no class labels.")
-        statistics["n_classes"] = n_classes
+        statistics["n_classes"] = len(classes)
 
     return {
         "concept_id": concept_id,
@@ -384,10 +382,13 @@ def main(argv=None):
     pairs = discover_dataset_pairs(args.dataset_name, args.path)
     record_rows = read_jsonl(args.records)
     record = find_dataset_record(args.dataset_name, record_rows)
-    existing_rows = read_jsonl(args.catalog)
+    catalog_path = args.catalog.resolve()
+    lock_path = catalog_path.with_name(f".{catalog_path.name}.lock")
+    lock = FileLock(str(lock_path))
 
-    if not args.replace_existing:
-        merge_dataset_rows(existing_rows, [], args.dataset_name)
+    if not args.replace_existing and catalog_path.is_file():
+        with lock:
+            merge_dataset_rows(read_jsonl(catalog_path), [], args.dataset_name)
 
     verify_current_record(record, read_jsonl(args.versions))
     verify_dataset_files(pairs, record, read_jsonl(args.files), args.archive)
@@ -395,15 +396,15 @@ def main(argv=None):
         build_dataset_row(name, record["concept_id"], pair)
         for name, pair in pairs.items()
     ]
-    rows = merge_dataset_rows(
-        existing_rows,
-        generated_rows,
-        args.dataset_name,
-        replace=args.replace_existing,
-    )
-
-    args.catalog.parent.mkdir(parents=True, exist_ok=True)
-    write_jsonl(args.catalog, rows)
+    catalog_path.parent.mkdir(parents=True, exist_ok=True)
+    with lock:
+        rows = merge_dataset_rows(
+            read_jsonl(catalog_path),
+            generated_rows,
+            args.dataset_name,
+            replace=args.replace_existing,
+        )
+        write_jsonl(catalog_path, rows)
     action = "Replaced" if args.replace_existing else "Added"
     names = ", ".join(row["dataset_name"] for row in generated_rows)
     print(f"{action} {len(generated_rows)} dataset rows: {names}.")

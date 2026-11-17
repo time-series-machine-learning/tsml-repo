@@ -225,6 +225,23 @@ def test_fetch_records_rejects_a_changing_total(monkeypatch):
         tsml_records.fetch_records(mock.Mock(), page_size=25)
 
 
+@pytest.mark.parametrize(
+    ("duplicate_page", "page_number"),
+    [("same", 1), ("later", 2)],
+)
+def test_fetch_records_rejects_duplicate_ids(monkeypatch, duplicate_page, page_number):
+    """A matching reported total must not hide a repeated hit."""
+    record = make_record(1, "100", "2026-01-01")
+    repeated = {**record, "id": "1"}
+    pages = [[record, repeated]] if duplicate_page == "same" else [[record], [repeated]]
+    monkeypatch.setattr(tsml_records, "get_page", mock.Mock(side_effect=[
+        {"hits": {"hits": hits, "total": 2}} for hits in pages
+    ]))
+
+    with pytest.raises(ValueError, match=f"Duplicate Zenodo record ID 1 on page {page_number}"):
+        tsml_records.fetch_records(mock.Mock(), page_size=25)
+
+
 def test_splits_multiple_previous_versions():
     """Verify one current version is separated from every older version."""
     records = [

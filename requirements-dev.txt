@@ -1,4 +1,5 @@
 aeon>=1.4.0
+filelock
 jsonschema
 pre-commit
 pytest

@@ -2,6 +2,8 @@
 
 import hashlib
 import json
+from concurrent.futures import ThreadPoolExecutor
+from threading import Barrier
 from zipfile import ZipFile
 
 import numpy as np
@@ -145,12 +147,17 @@ def test_existing_family_requires_explicit_replacement():
     ]
 
 
-def test_main_looks_up_concept_and_writes_discovered_rows(
-    tmp_path, monkeypatch
-):
-    """Run the local workflow without requiring aeon or external requests."""
+def test_main_looks_up_concept_and_writes_discovered_rows(tmp_path):
+    """Run the normal local workflow on published TRAIN/TEST fixtures."""
     data_dir = tmp_path / "data"
     pairs = [make_pair(data_dir, name) for name in ("Adiac", "Adiac_eq")]
+    for pair in pairs:
+        for path in pair.values():
+            path.write_text(
+                "@problemName Adiac\n@univariate true\n@equalLength true\n"
+                "@classLabel true a b\n@data\n1,2:a\n3,4:b\n",
+                encoding="utf-8",
+            )
     records_path = tmp_path / "records.jsonl"
     datasets_path = tmp_path / "datasets.jsonl"
     files_path = tmp_path / "zenodo_files.jsonl"
@@ -172,8 +179,6 @@ def test_main_looks_up_concept_and_writes_discovered_rows(
         files_path,
         [file_row(path, 11179788, 11179787) for pair in pairs for path in pair.values()],
     )
-    monkeypatch.setattr(catalog, "load_ts_file", make_loader())
-
     result = catalog.main(
         [
             "Adiac",
@@ -193,6 +198,7 @@ def test_main_looks_up_concept_and_writes_discovered_rows(
     assert result == 0
     assert [row["dataset_name"] for row in rows] == ["Adiac", "Adiac_eq"]
     assert {row["concept_id"] for row in rows} == {11179787}
+    assert all(row["statistics"]["case_counts"] == {"train": 2, "test": 2} for row in rows)
 
 
 @pytest.mark.parametrize(
@@ -225,10 +231,10 @@ def test_main_rejects_cached_previous_version_without_writing(
     catalog.write_jsonl(files_path, [older, file_row(train, 102, 100), file_row(pair["test"], 102, 100)])
     train.write_bytes(b"v1\n")
 
-    def unexpected_loader(path):
+    def unexpected_loader(path, loader=None):
         pytest.fail(f"Loaded {path} before verifying the source files")
 
-    monkeypatch.setattr(catalog, "load_ts_file", unexpected_loader)
+    monkeypatch.setattr(catalog, "open_ts_split", unexpected_loader)
     with pytest.raises(ValueError, match=message):
         catalog.main([
             "Adiac", str(data),
@@ -262,3 +268,86 @@ def test_zip_only_records_verify_extracted_pairs(tmp_path):
     pair["train"].write_bytes(b"stale\n")
     with pytest.raises(ValueError, match="does not match a dataset file in"):
         catalog.verify_dataset_files(pairs, record, files, archive)
+
+
+def test_streamed_statistics_match_aeon(tmp_path, monkeypatch):
+    """Preserve full-loader stats while passing only one case to aeon at a time."""
+    from aeon.datasets import load_from_ts_file
+    from aeon.datasets import _data_loaders
+
+    pair = make_pair(tmp_path, "Adiac")
+    header = (
+        "@problemName Adiac\n@univariate false\n@equalLength false\n"
+        "@classLabel true a b c\n@data\n"
+    )
+    pair["train"].write_text(header + "1,?,3:4,5,6:a\n1,2:3,4:b\n", encoding="utf-8")
+    pair["test"].write_text(header + "1,2,3,4:5,6,7,8:c\n", encoding="utf-8")
+    expected = catalog.build_dataset_row(
+        "Adiac", 1, pair, loader=lambda path: load_from_ts_file(path, return_meta_data=True)
+    )
+
+    original_load = _data_loaders._load_data
+    batch_sizes = []
+
+    def load_one_case(lines, metadata):
+        batch = list(lines)
+        batch_sizes.append(len(batch))
+        return original_load(batch, metadata)
+
+    monkeypatch.setattr(_data_loaders, "_load_data", load_one_case)
+    actual = catalog.build_dataset_row("Adiac", 1, pair)
+
+    assert batch_sizes == [1, 1, 1]
+    assert actual == expected
+    assert actual["statistics"]["n_classes"] == 3
+    assert actual["statistics"]["missing_value_count"] == 1
+
+
+def test_equal_length_validation_covers_consecutive_cases(tmp_path):
+    """Retain split-wide header validation when reading one case at a time."""
+    pair = make_pair(tmp_path, "Adiac")
+    header = "@univariate true\n@equalLength true\n@classLabel true a b\n@data\n"
+    pair["train"].write_text(header + "1,2:a\n1,2,3:b\n", encoding="utf-8")
+    pair["test"].write_text(header + "1,2:a\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="unequal lengths in equal-length split"):
+        catalog.build_dataset_row("Adiac", 1, pair)
+
+
+def test_simultaneous_writers_keep_both_rows(tmp_path, monkeypatch):
+    """Let both commands build rows before either merges into the shared catalogue."""
+    data = tmp_path / "data"
+    output = tmp_path / "datasets.jsonl"
+    records_path = tmp_path / "records.jsonl"
+    files_path = tmp_path / "zenodo_files.jsonl"
+    versions_path = tmp_path / "zenodo_versions.jsonl"
+    names = ("Adiac", "GunPoint")
+    records = []
+    files = []
+    versions = []
+    for index, name in enumerate(names, 1):
+        record_id = index + 10
+        records.append({"concept_id": index, "current_record_id": record_id,
+                        "name": name, "kind": "dataset"})
+        files.extend(file_row(path, record_id, index) for path in make_pair(data, name).values())
+        versions.append({"concept_id": index, "record_id": record_id, "is_current": True})
+    catalog.write_jsonl(records_path, records)
+    catalog.write_jsonl(files_path, files)
+    catalog.write_jsonl(versions_path, versions)
+    ready = Barrier(len(names), timeout=10)
+
+    def build_row(name, concept_id, pair):
+        ready.wait()
+        return {"dataset_name": name, "concept_id": concept_id}
+
+    def run(name):
+        return catalog.main([
+            name, str(data), "--catalog", str(output), "--records", str(records_path),
+            "--files", str(files_path), "--versions", str(versions_path),
+        ])
+
+    monkeypatch.setattr(catalog, "build_dataset_row", build_row)
+    with ThreadPoolExecutor(max_workers=len(names)) as pool:
+        assert list(pool.map(run, names)) == [0, 0]
+
+    assert [row["dataset_name"] for row in catalog.read_jsonl(output)] == list(names)

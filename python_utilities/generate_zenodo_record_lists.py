@@ -100,6 +100,7 @@ def get_page(opener, page, page_size):
 def fetch_records(opener, page_size):
     """Retrieve every version of every record in the Zenodo community."""
     records = []
+    seen_ids = set()
     expected_total = None
     page = 1
 
@@ -120,6 +121,14 @@ def fetch_records(opener, page_size):
                 f"on page {page}."
             )
 
+        for record in hits:
+            try:
+                record_id = int(record["id"])
+            except (KeyError, TypeError, ValueError) as error:
+                raise ValueError(f"Invalid Zenodo record ID on page {page}.") from error
+            if record_id in seen_ids:
+                raise ValueError(f"Duplicate Zenodo record ID {record_id} on page {page}.")
+            seen_ids.add(record_id)
         records.extend(hits)
         if len(records) == expected_total:
             return records
