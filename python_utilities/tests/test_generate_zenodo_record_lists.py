@@ -5,6 +5,7 @@ from io import BytesIO
 from unittest import mock
 from urllib.error import HTTPError
 from urllib.parse import parse_qs, urlparse
+from urllib.request import HTTPRedirectHandler, Request
 
 import pytest
 
@@ -107,6 +108,20 @@ def test_opener_has_user_agent_and_optional_authorization():
     assert "Authorization" not in anonymous_headers
 
 
+def test_only_anonymous_requests_can_follow_redirects():
+    """Never follow redirects when the opener has a bearer token."""
+    request = Request(tsml_records.API_URL)
+    destination = "https://example.invalid/records"
+    for token in (None, "test-token"):
+        opener = tsml_records.create_opener(token)
+        handler = next(h for h in opener.handlers if isinstance(h, HTTPRedirectHandler))
+        redirect = handler.redirect_request(request, None, 302, "Found", {}, destination)
+        if token is None:
+            assert redirect.full_url == destination
+        else:
+            assert redirect is None
+
+
 def test_get_page_builds_query_and_retries_transient_error(monkeypatch):
     """Verify page queries and retry handling for transient failures."""
     payload = {"hits": {"hits": []}}
@@ -172,6 +187,41 @@ def test_fetch_records_rejects_incorrect_total(monkeypatch):
     monkeypatch.setattr(tsml_records, "get_page", get_page)
 
     with pytest.raises(ValueError, match="reported 2 records but returned 1"):
+        tsml_records.fetch_records(mock.Mock(), page_size=25)
+
+
+@pytest.mark.parametrize(
+    "response",
+    [[], {}, {"hits": {}}, {"hits": {"total": 0, "hits": []}}, {"hits": {"total": 1}}],
+)
+def test_invalid_search_leaves_existing_record_lists_untouched(tmp_path, monkeypatch, response):
+    """Reject malformed or empty search results before replacing either list."""
+    current = tmp_path / "current-versions"
+    previous = tmp_path / "previous-versions"
+    current.write_text("Example: 2\n", encoding="utf-8")
+    previous.write_text("Example: 1\n", encoding="utf-8")
+    monkeypatch.setattr(tsml_records, "CURRENT_VERSIONS_PATH", current)
+    monkeypatch.setattr(tsml_records, "PREVIOUS_VERSIONS_PATH", previous)
+    monkeypatch.setattr(tsml_records, "RECORDS_DIR", tmp_path)
+    monkeypatch.setattr(tsml_records, "load_token", mock.Mock(return_value=None))
+    monkeypatch.setattr(tsml_records, "get_page", mock.Mock(return_value=response))
+
+    with pytest.raises(ValueError, match="Zenodo search response on page 1"):
+        tsml_records.main(input_fn=lambda _: "")
+
+    assert current.read_text(encoding="utf-8") == "Example: 2\n"
+    assert previous.read_text(encoding="utf-8") == "Example: 1\n"
+
+
+def test_fetch_records_rejects_a_changing_total(monkeypatch):
+    """Reject pagination if the reported total changes mid-fetch."""
+    pages = [
+        {"hits": {"hits": [make_record(1, "100", "2025-01-01")], "total": 2}},
+        {"hits": {"hits": [make_record(2, "200", "2026-01-01")], "total": 3}},
+    ]
+    monkeypatch.setattr(tsml_records, "get_page", mock.Mock(side_effect=pages))
+
+    with pytest.raises(ValueError, match="search total changed from 2 to 3 on page 2"):
         tsml_records.fetch_records(mock.Mock(), page_size=25)
 
 

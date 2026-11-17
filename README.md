@@ -4,6 +4,8 @@ Browse and download published datasets from the [TSML community on Zenodo](https
 
 The [catalogue manifests](manifest/) list records, versions, and files. The [Python utilities](python_utilities/) generate these inventories and compute dataset statistics from local files.
 
+The statistics generator checks local TRAIN and TEST files against the current Zenodo version. For ZIP-only datasets, pass the original published ZIP with `--archive` and point the generator at the extracted files.
+
 ## Load and classify a dataset with aeon
 
 Install [aeon](https://www.aeon-toolkit.org/).

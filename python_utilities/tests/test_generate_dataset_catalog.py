@@ -1,6 +1,8 @@
 """Tests for generating dataset catalogue rows from local .ts files."""
 
+import hashlib
 import json
+from zipfile import ZipFile
 
 import numpy as np
 import pytest
@@ -17,6 +19,18 @@ def make_pair(directory, name):
         path.touch()
         pair[split] = path
     return pair
+
+
+def file_row(path, record_id, concept_id):
+    """Build a file inventory row from a small published test fixture."""
+    data = path.read_bytes()
+    return {
+        "record_id": record_id,
+        "concept_id": concept_id,
+        "key": path.name,
+        "size": len(data),
+        "checksum": f"md5:{hashlib.md5(data, usedforsecurity=False).hexdigest()}",
+    }
 
 
 def make_loader(task="classification"):
@@ -136,13 +150,27 @@ def test_main_looks_up_concept_and_writes_discovered_rows(
 ):
     """Run the local workflow without requiring aeon or external requests."""
     data_dir = tmp_path / "data"
-    make_pair(data_dir, "Adiac")
-    make_pair(data_dir, "Adiac_eq")
+    pairs = [make_pair(data_dir, name) for name in ("Adiac", "Adiac_eq")]
     records_path = tmp_path / "records.jsonl"
     datasets_path = tmp_path / "datasets.jsonl"
+    files_path = tmp_path / "zenodo_files.jsonl"
+    versions_path = tmp_path / "zenodo_versions.jsonl"
     catalog.write_jsonl(
         records_path,
-        [{"concept_id": 11179787, "kind": "dataset", "name": "Adiac"}],
+        [{
+            "concept_id": 11179787,
+            "current_record_id": 11179788,
+            "kind": "dataset",
+            "name": "Adiac",
+        }],
+    )
+    catalog.write_jsonl(
+        versions_path,
+        [{"concept_id": 11179787, "record_id": 11179788, "is_current": True}],
+    )
+    catalog.write_jsonl(
+        files_path,
+        [file_row(path, 11179788, 11179787) for pair in pairs for path in pair.values()],
     )
     monkeypatch.setattr(catalog, "load_ts_file", make_loader())
 
@@ -154,6 +182,10 @@ def test_main_looks_up_concept_and_writes_discovered_rows(
             str(datasets_path),
             "--records",
             str(records_path),
+            "--files",
+            str(files_path),
+            "--versions",
+            str(versions_path),
         ]
     )
     rows = [json.loads(line) for line in datasets_path.read_text().splitlines()]
@@ -161,3 +193,72 @@ def test_main_looks_up_concept_and_writes_discovered_rows(
     assert result == 0
     assert [row["dataset_name"] for row in rows] == ["Adiac", "Adiac_eq"]
     assert {row["concept_id"] for row in rows} == {11179787}
+
+
+@pytest.mark.parametrize(
+    ("catalogue_record_id", "message"),
+    [(101, "does not match the current Zenodo version snapshot"), (102, "Adiac_TRAIN.ts.*record 102")],
+)
+def test_main_rejects_cached_previous_version_without_writing(
+    tmp_path, monkeypatch, catalogue_record_id, message
+):
+    """Reject stale data even if it has the old record ID, name, and size."""
+    data = tmp_path / "data"
+    pair = make_pair(data, "Adiac")
+    record = {
+        "concept_id": 100, "current_record_id": catalogue_record_id,
+        "kind": "dataset", "name": "Adiac",
+    }
+    records_path = tmp_path / "records.jsonl"
+    files_path = tmp_path / "zenodo_files.jsonl"
+    versions_path = tmp_path / "zenodo_versions.jsonl"
+    output = tmp_path / "datasets.jsonl"
+    catalog.write_jsonl(records_path, [record])
+    catalog.write_jsonl(versions_path, [{"concept_id": 100, "record_id": 102, "is_current": True}])
+    output.write_bytes(b'{"dataset_name": "Adiac"}\n')
+    original_output = output.read_bytes()
+
+    train = pair["train"]
+    train.write_bytes(b"v1\n")
+    older = file_row(train, 101, 100)
+    train.write_bytes(b"v2\n")
+    catalog.write_jsonl(files_path, [older, file_row(train, 102, 100), file_row(pair["test"], 102, 100)])
+    train.write_bytes(b"v1\n")
+
+    def unexpected_loader(path):
+        pytest.fail(f"Loaded {path} before verifying the source files")
+
+    monkeypatch.setattr(catalog, "load_ts_file", unexpected_loader)
+    with pytest.raises(ValueError, match=message):
+        catalog.main([
+            "Adiac", str(data),
+            "--catalog", str(output),
+            "--records", str(records_path),
+            "--files", str(files_path),
+            "--versions", str(versions_path),
+            "--replace-existing",
+        ])
+
+    assert output.read_bytes() == original_output
+
+
+def test_zip_only_records_verify_extracted_pairs(tmp_path):
+    """Accept a published ZIP and detect changes in its extracted files."""
+    pair = make_pair(tmp_path / "extracted", "S2Agri-17")
+    pair["train"].write_bytes(b"train\n")
+    pair["test"].write_bytes(b"test\n")
+    archive = tmp_path / "S2Agri-17.zip"
+    with ZipFile(archive, "w") as output:
+        for path in pair.values():
+            output.write(path, arcname=f"S2Agri-17/{path.name}")
+    record = {"concept_id": 100, "current_record_id": 101}
+    files = [file_row(archive, 101, 100)]
+    pairs = {"S2Agri-17": pair}
+
+    with pytest.raises(ValueError, match="Use --archive"):
+        catalog.verify_dataset_files(pairs, record, files)
+    catalog.verify_dataset_files(pairs, record, files, archive)
+
+    pair["train"].write_bytes(b"stale\n")
+    with pytest.raises(ValueError, match="does not match a dataset file in"):
+        catalog.verify_dataset_files(pairs, record, files, archive)

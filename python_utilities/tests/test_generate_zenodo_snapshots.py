@@ -249,3 +249,21 @@ def test_main_does_not_append_unchanged_snapshot_history(tmp_path, monkeypatch):
     assert history_path.read_text(encoding="utf-8") == snapshots.jsonl_contents(
         [history]
     )
+
+
+def test_main_leaves_existing_snapshots_untouched_after_invalid_search(tmp_path, monkeypatch):
+    """An incomplete search must leave the previously generated snapshot in place."""
+    paths = ("VERSIONS_SNAPSHOT_PATH", "FILES_SNAPSHOT_PATH", "SNAPSHOT_PATH")
+    expected = {}
+    for attr in paths:
+        path = tmp_path / f"{attr}.jsonl"
+        expected[path] = b'{}\n'
+        path.write_bytes(expected[path])
+        monkeypatch.setattr(snapshots, attr, path)
+    monkeypatch.setattr(snapshots, "MANIFEST_DIR", tmp_path)
+    monkeypatch.setattr(snapshots.record_lists, "get_page", mock.Mock(return_value={}))
+
+    with pytest.raises(ValueError, match="Invalid Zenodo search response"):
+        snapshots.main(input_fn=lambda _: "")
+
+    assert {path: path.read_bytes() for path in expected} == expected

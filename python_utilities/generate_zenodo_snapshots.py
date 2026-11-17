@@ -144,6 +144,8 @@ def build_snapshot(version_rows, file_rows, retrieved_at):
 
 def validate_snapshot(version_rows, file_rows, snapshot):
     """Validate relationships and counts across the generated snapshots."""
+    if not version_rows:
+        raise ValueError("The Zenodo snapshot contains no record versions.")
     records = {}
     current_by_concept = defaultdict(int)
     for row in version_rows:

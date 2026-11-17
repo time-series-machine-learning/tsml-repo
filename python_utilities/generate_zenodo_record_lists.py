@@ -6,7 +6,7 @@ from collections import defaultdict
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
-from urllib.request import build_opener
+from urllib.request import HTTPRedirectHandler, build_opener
 
 API_URL = "https://zenodo.org/api/records"
 USER_AGENT = "tsml-archive"
@@ -52,9 +52,16 @@ def load_token():
     return token
 
 
+class RejectRedirects(HTTPRedirectHandler):
+    """Stop a credential-bearing request at the original URL."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
 def create_opener(token):
-    """Create a URL opener, with Zenodo authentication when available."""
-    opener = build_opener()
+    """Create a URL opener that follows redirects only for anonymous requests."""
+    opener = build_opener(RejectRedirects()) if token else build_opener()
     opener.addheaders = [("User-Agent", USER_AGENT)]
     if token:
         opener.addheaders.append(("Authorization", f"Bearer {token}"))
@@ -98,24 +105,29 @@ def fetch_records(opener, page_size):
 
     while True:
         data = get_page(opener, page, page_size)
-        hit_data = data.get("hits", {})
-        hits = hit_data.get("hits", [])
+        hit_data = data.get("hits") if isinstance(data, dict) else None
+        if not isinstance(hit_data, dict):
+            raise ValueError(f"Invalid Zenodo search response on page {page}.")
+        total = hit_data.get("total")
+        hits = hit_data.get("hits")
+        if type(total) is not int or total < 1 or not isinstance(hits, list):
+            raise ValueError(f"Invalid or empty Zenodo search response on page {page}.")
         if expected_total is None:
-            expected_total = hit_data.get("total")
+            expected_total = total
+        elif total != expected_total:
+            raise ValueError(
+                f"Zenodo search total changed from {expected_total} to {total} "
+                f"on page {page}."
+            )
 
         records.extend(hits)
-        if not hits or (
-            expected_total is not None and len(records) >= expected_total
-        ):
-            break
+        if len(records) == expected_total:
+            return records
+        if not hits or len(records) > expected_total:
+            raise ValueError(
+                f"Zenodo reported {expected_total} records but returned {len(records)}."
+            )
         page += 1
-
-    if expected_total is not None and len(records) != expected_total:
-        raise ValueError(
-            f"Zenodo reported {expected_total} records but returned {len(records)}."
-        )
-
-    return records
 
 
 def record_sort_key(record):

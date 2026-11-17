@@ -1,8 +1,10 @@
 """Generate dataset catalogue rows from local .ts train/test pairs."""
 
 import argparse
+import hashlib
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
+from zipfile import ZipFile
 
 import numpy as np
 
@@ -11,6 +13,8 @@ REPOSITORY_ROOT = SCRIPT_DIR.parent
 MANIFEST_DIR = REPOSITORY_ROOT / "manifest"
 DATASET_CATALOG_PATH = MANIFEST_DIR / "datasets.jsonl"
 RECORDS_CATALOG_PATH = MANIFEST_DIR / "records.jsonl"
+FILES_SNAPSHOT_PATH = MANIFEST_DIR / "zenodo_files.jsonl"
+VERSIONS_SNAPSHOT_PATH = MANIFEST_DIR / "zenodo_versions.jsonl"
 VARIANT_SUFFIXES = ("", "_eq", "_nmv")
 SPLITS = ("train", "test")
 
@@ -92,8 +96,8 @@ def discover_dataset_pairs(dataset_name, directory):
     }
 
 
-def find_concept_id(dataset_name, record_rows):
-    """Find the dataset's Zenodo concept ID in the record catalogue."""
+def find_dataset_record(dataset_name, record_rows):
+    """Find the current dataset record in the record catalogue."""
     matches = [row for row in record_rows if row.get("name") == dataset_name]
     if len(matches) != 1:
         raise ValueError(
@@ -104,7 +108,88 @@ def find_concept_id(dataset_name, record_rows):
     record = matches[0]
     if record.get("kind") != "dataset":
         raise ValueError(f"Record {dataset_name} is not marked as a dataset.")
-    return int(record["concept_id"])
+    return record
+
+
+def md5_checksum(stream):
+    """Compute the checksum format used in the Zenodo file inventory."""
+    digest = hashlib.md5(usedforsecurity=False)
+    for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+        digest.update(chunk)
+    return f"md5:{digest.hexdigest()}"
+
+
+def verify_current_record(record, version_rows):
+    """Require the record catalogue to agree with the current version snapshot."""
+    current_ids = [
+        row["record_id"]
+        for row in version_rows
+        if row["concept_id"] == record["concept_id"] and row["is_current"]
+    ]
+    if current_ids != [record["current_record_id"]]:
+        raise ValueError(
+            f"The catalogue entry for {record['name']} does not match the current "
+            "Zenodo version snapshot. Refresh the record catalogue first."
+        )
+
+
+def verify_published_file(path, expected, record_id):
+    """Verify a local file against the current version's file inventory."""
+    if expected is not None and path.stat().st_size == expected["size"]:
+        with path.open("rb") as stream:
+            if md5_checksum(stream) == expected["checksum"]:
+                return
+    raise ValueError(
+        f"{path} does not match a published file for Zenodo record {record_id}."
+    )
+
+
+def verify_archive_members(archive_path, paths):
+    """Compare extracted data to members of a verified ZIP without extracting it."""
+    with ZipFile(archive_path) as archive:
+        members = {}
+        names = {path.name.casefold() for path in paths}
+        for member in archive.infolist():
+            name = PurePosixPath(member.filename).name.casefold()
+            if member.is_dir() or name not in names:
+                continue
+            if name in members:
+                raise ValueError(f"Multiple copies of {name} in {archive_path}.")
+            members[name] = member
+
+        for path in paths:
+            member = members.get(path.name.casefold())
+            if member is not None and path.stat().st_size == member.file_size:
+                with path.open("rb") as local, archive.open(member) as published:
+                    if md5_checksum(local) == md5_checksum(published):
+                        continue
+            raise ValueError(f"{path} does not match a dataset file in {archive_path}.")
+
+
+def verify_dataset_files(pairs, record, file_rows, archive_path=None):
+    """Check every discovered split against the dataset's current Zenodo version."""
+    record_id = record["current_record_id"]
+    files = {
+        row["key"].casefold(): row
+        for row in file_rows
+        if row["record_id"] == record_id and row["concept_id"] == record["concept_id"]
+    }
+    paths = [path for pair in pairs.values() for path in pair.values()]
+    if archive_path is not None:
+        if archive_path.suffix.casefold() != ".zip":
+            raise ValueError("--archive must point to the published ZIP file.")
+        verify_published_file(
+            archive_path, files.get(archive_path.name.casefold()), record_id
+        )
+        verify_archive_members(archive_path, paths)
+        return
+
+    if any(name.endswith(".zip") for name in files) and any(
+        path.name.casefold() not in files for path in paths
+    ):
+        raise ValueError(f"Use --archive with the published ZIP for Zenodo record {record_id}.")
+    for path in paths:
+        verify_published_file(path, files.get(path.name.casefold()), record_id)
 
 
 def load_ts_file(path):
@@ -266,7 +351,24 @@ def parse_args(argv=None):
         "--records",
         type=Path,
         default=RECORDS_CATALOG_PATH,
-        help="Record JSONL file used to find the Zenodo concept ID.",
+        help="Record JSONL file used to find the current Zenodo record.",
+    )
+    parser.add_argument(
+        "--files",
+        type=Path,
+        default=FILES_SNAPSHOT_PATH,
+        help="Zenodo file JSONL snapshot used to verify local inputs.",
+    )
+    parser.add_argument(
+        "--versions",
+        type=Path,
+        default=VERSIONS_SNAPSHOT_PATH,
+        help="Zenodo version JSONL snapshot used to check the current record ID.",
+    )
+    parser.add_argument(
+        "--archive",
+        type=Path,
+        help="Published ZIP to verify against when using extracted dataset files.",
     )
     parser.add_argument(
         "--replace-existing",
@@ -281,14 +383,16 @@ def main(argv=None):
     args = parse_args(argv)
     pairs = discover_dataset_pairs(args.dataset_name, args.path)
     record_rows = read_jsonl(args.records)
-    concept_id = find_concept_id(args.dataset_name, record_rows)
+    record = find_dataset_record(args.dataset_name, record_rows)
     existing_rows = read_jsonl(args.catalog)
 
     if not args.replace_existing:
         merge_dataset_rows(existing_rows, [], args.dataset_name)
 
+    verify_current_record(record, read_jsonl(args.versions))
+    verify_dataset_files(pairs, record, read_jsonl(args.files), args.archive)
     generated_rows = [
-        build_dataset_row(name, concept_id, pair)
+        build_dataset_row(name, record["concept_id"], pair)
         for name, pair in pairs.items()
     ]
     rows = merge_dataset_rows(
