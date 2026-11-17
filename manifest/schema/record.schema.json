@@ -1,5 +1,5 @@
 {
-  "$id": "https://raw.githubusercontent.com/time-series-machine-learning/tsml-repo/master/manifest/schema/record.schema.json",
+  "$id": "https://raw.githubusercontent.com/time-series-machine-learning/tsml-repo/main/manifest/schema/record.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "description": "One current Zenodo record and its record-list memberships.",
