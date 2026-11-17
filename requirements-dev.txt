@@ -1,0 +1,4 @@
+aeon>=1.4.0
+jsonschema
+pre-commit
+pytest

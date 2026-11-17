@@ -1,0 +1,23 @@
+name: Report a dataset problem
+description: Raise an issue about an archive dataset
+title: "[Dataset] "
+labels: ["data issue"]
+body:
+  - type: textarea
+    id: dataset
+    attributes:
+      label: Dataset
+      description: >-
+        Provide the dataset name, Zenodo URL or DOI, and affected files or
+        variants. If you downloaded it elsewhere, include the source.
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Issue details
+      description: >-
+        Describe the issue and what you expected to see. Include the affected
+        split, loader and version, and steps to reproduce where applicable.
+    validations:
+      required: true

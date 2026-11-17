@@ -1,0 +1,21 @@
+name: Suggest a dataset
+description: Recommend a dataset already available from another source
+title: "[Dataset suggestion] "
+labels: ["suggestion"]
+body:
+  - type: input
+    id: dataset
+    attributes:
+      label: Dataset name
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Source
+      description: Link to the original dataset or publication. Include its licence if known.
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: Tell us what task or application this dataset would add to the archive.

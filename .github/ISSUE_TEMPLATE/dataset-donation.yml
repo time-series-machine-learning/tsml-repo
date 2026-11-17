@@ -1,0 +1,51 @@
+name: Donate a dataset
+description: Offer data you have permission to share with the archive
+title: "[Donation] "
+labels: ["donation"]
+body:
+  - type: textarea
+    id: dataset
+    attributes:
+      label: Dataset
+      description: >-
+        Write a short description for the catalogue. Explain what was measured,
+        the task, and what the class labels or regression targets mean.
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Source
+      description: >-
+        Link to the data. If it needs to be shared privately, ask the
+        maintainers to contact you.
+  - type: textarea
+    id: licence
+    attributes:
+      label: Licence
+      description: >-
+        Link to the dataset licence and describe any conditions on publishing
+        or redistributing the data and derived variants.
+  - type: textarea
+    id: format-and-evaluation
+    attributes:
+      label: Dataset structure
+      description: >-
+        State whether the series are univariate or multivariate. Note uneven
+        lengths, missing values, and any existing padding. Please provide the
+        original unpadded series if available.
+  - type: textarea
+    id: splits
+    attributes:
+      label: Train/test split
+      description: >-
+        Say whether the dataset already has a train/test split. If you
+        recommend a new split, note any groups that should stay together,
+        such as cases from the same subject, session, or device.
+  - type: textarea
+    id: attribution
+    attributes:
+      label: Attribution
+      description: >-
+        Share related papers, preferred attribution, and any figure the
+        archive has permission to use.

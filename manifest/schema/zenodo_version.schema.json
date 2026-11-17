@@ -1,5 +1,5 @@
 {
-  "$id": "https://raw.githubusercontent.com/time-series-machine-learning/tsml-repo/master/manifest/schema/zenodo_version.schema.json",
+  "$id": "https://raw.githubusercontent.com/time-series-machine-learning/tsml-repo/main/manifest/schema/zenodo_version.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {

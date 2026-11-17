@@ -1,0 +1,19 @@
+name: Website feedback
+description: Give feedback on the archive website
+title: "[Website] "
+labels: ["website"]
+body:
+  - type: input
+    id: page
+    attributes:
+      label: Page URL
+      description: Link to the relevant page, if applicable.
+  - type: textarea
+    id: feedback
+    attributes:
+      label: Feedback
+      description: >-
+        Describe the change you would like to see, or explain what happened
+        and how to reproduce the problem.
+    validations:
+      required: true
