@@ -10,7 +10,7 @@ Install [aeon](https://www.aeon-toolkit.org/).
 python -m pip install "aeon>=1.4.0"
 ```
 
-Use the predefined TRAIN and TEST splits of GunPoint to train HIVE-COTE v2 (HC2) and measure its accuracy on the test split. The loader can fetch missing archive files from Zenodo and reuse the copies in `extract_path`. The example sets a one-minute training contract.
+Use the predefined TRAIN and TEST splits of GunPoint to train HIVE-COTE v2 (HC2) and measure its accuracy on the test split. The loader can fetch missing archive files from Zenodo and reuse the copies in `extract_path`.
 
 ```python
 from aeon.classification.hybrid import HIVECOTEV2
@@ -20,7 +20,7 @@ data_dir = "local/tsml-data"
 X_train, y_train = load_classification("GunPoint", split="train", extract_path=data_dir)
 X_test, y_test = load_classification("GunPoint", split="test", extract_path=data_dir)
 
-classifier = HIVECOTEV2(time_limit_in_minutes=1, random_state=0)
+classifier = HIVECOTEV2(random_state=0)
 classifier.fit(X_train, y_train)
 
 print(f"Training data shape (cases, channels, time points): {X_train.shape}")
