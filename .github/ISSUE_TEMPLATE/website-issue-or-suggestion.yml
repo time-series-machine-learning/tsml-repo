@@ -1,6 +1,7 @@
 name: Website feedback
 description: Report a broken page or suggest a website improvement
 title: "[Website] "
+labels: ["website"]
 body:
   - type: input
     id: page

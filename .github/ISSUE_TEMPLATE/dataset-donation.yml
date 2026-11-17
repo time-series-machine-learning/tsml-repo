@@ -1,6 +1,7 @@
 name: Propose a dataset
 description: Offer a time series dataset for inclusion in the archive
 title: "[Donation] "
+labels: ["donation"]
 body:
   - type: textarea
     id: dataset

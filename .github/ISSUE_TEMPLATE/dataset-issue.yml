@@ -1,6 +1,7 @@
 name: Report a dataset problem
 description: Ask about a dataset or report a problem with an archive file
 title: "[Dataset] "
+labels: ["data issue"]
 body:
   - type: textarea
     id: dataset
