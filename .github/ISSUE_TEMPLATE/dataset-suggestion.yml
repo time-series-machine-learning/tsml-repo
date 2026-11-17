@@ -1,7 +1,7 @@
 name: Suggest a dataset
 description: Recommend a dataset already available from another source
 title: "[Dataset suggestion] "
-labels: ["enhancement"]
+labels: ["suggestion"]
 body:
   - type: input
     id: dataset
