@@ -22,7 +22,6 @@
     },
     "series_length": {
       "additionalProperties": false,
-      "description": "Sample counts per channel across all cases in both splits.",
       "properties": {
         "max": {
           "minimum": 0,
