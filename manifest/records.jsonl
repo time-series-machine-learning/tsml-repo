@@ -257,7 +257,7 @@
 {"concept_id": 11236719, "current_record_id": 11236720, "kind": "dataset", "name": "PotassiumConcentration", "record_lists": ["regression", "regression-uv"], "record_url": "https://zenodo.org/records/11236720"}
 {"concept_id": 11197947, "current_record_id": 11197948, "kind": "dataset", "name": "PowerCons", "record_lists": ["classification-uv"], "record_url": "https://zenodo.org/records/11197948"}
 {"concept_id": 18485134, "current_record_id": 18485135, "kind": "dataset", "name": "PPGDalia", "record_lists": ["regression", "regression-mv"], "record_url": "https://zenodo.org/records/18485135"}
-{"concept_id": 18499659, "current_record_id": 18499660, "kind": "dataset", "name": "PPGDalia_disc", "record_lists": ["classification-mv"], "record_url": "https://zenodo.org/records/18499660"}
+{"concept_id": 18499659, "current_record_id": 24354112, "kind": "dataset", "name": "PPGDalia_disc", "record_lists": ["classification-mv"], "record_url": "https://zenodo.org/records/24354112"}
 {"concept_id": 11236732, "current_record_id": 11236733, "kind": "dataset", "name": "PrecipitationAndalusia", "record_lists": ["regression", "regression-mv"], "record_url": "https://zenodo.org/records/11236733"}
 {"concept_id": 15392754, "current_record_id": 15392755, "kind": "dataset", "name": "PronouncedSpeech", "record_lists": ["classification-mv", "eeg"], "record_url": "https://zenodo.org/records/15392755"}
 {"concept_id": 11197959, "current_record_id": 11197960, "kind": "dataset", "name": "ProximalPhalanxOutlineAgeGroup", "record_lists": ["classification-uv"], "record_url": "https://zenodo.org/records/11197960"}
@@ -315,7 +315,7 @@
 {"concept_id": 11198343, "current_record_id": 11198344, "kind": "dataset", "name": "Trace", "record_lists": ["classification-uv"], "record_url": "https://zenodo.org/records/11198344"}
 {"concept_id": 18681279, "current_record_id": 18681280, "kind": "dataset", "name": "Traffic", "record_lists": ["monster"], "record_url": "https://zenodo.org/records/18681280"}
 {"concept_id": 11236864, "current_record_id": 24195386, "kind": "aggregate", "name": "TSML Extended Time Series Extrinsic Regression Archive 2024", "record_lists": ["aggregated-archives"], "record_url": "https://zenodo.org/records/24195386"}
-{"concept_id": 18641020, "current_record_id": 18641021, "kind": "aggregate", "name": "TSML Imbalanced Univariate Time Series Classification Archive", "record_lists": ["aggregated-archives"], "record_url": "https://zenodo.org/records/18641021"}
+{"concept_id": 18641020, "current_record_id": 18641021, "kind": "aggregate", "name": "TSML Imbalanced Univariate Time Series Classification Archive 2025", "record_lists": ["aggregated-archives"], "record_url": "https://zenodo.org/records/18641021"}
 {"concept_id": 11206330, "current_record_id": 24281548, "kind": "aggregate", "name": "TSML Multivariate Time Series Classification Archive 2018", "record_lists": ["aggregated-archives"], "record_url": "https://zenodo.org/records/24281548"}
 {"concept_id": 11198351, "current_record_id": 11198352, "kind": "dataset", "name": "TwoLeadECG", "record_lists": ["classification-uv"], "record_url": "https://zenodo.org/records/11198352"}
 {"concept_id": 11198355, "current_record_id": 11198356, "kind": "dataset", "name": "TwoPatterns", "record_lists": ["classification-uv"], "record_url": "https://zenodo.org/records/11198356"}
