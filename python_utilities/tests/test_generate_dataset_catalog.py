@@ -314,6 +314,24 @@ def test_equal_length_validation_covers_consecutive_cases(tmp_path):
         catalog.build_dataset_row("Adiac", 1, pair)
 
 
+def test_regression_statistics_include_channels_of_different_lengths(tmp_path):
+    """Count the actual samples in each channel of a mixed-rate split."""
+    pair = make_pair(tmp_path, "PPGDalia")
+    header = "@univariate false\n@equalLength false\n@targetLabel true\n@data\n"
+    pair["train"].write_text(header + "1,?,3,4:5,6:60.5\n1,2:3,4:62.5\n", encoding="utf-8")
+    pair["test"].write_text(header + "1,2,3,4:5,6:65.5\n", encoding="utf-8")
+
+    row = catalog.build_dataset_row("PPGDalia", 1, pair)
+
+    assert row["task"] == "regression"
+    assert row["statistics"] == {
+        "case_counts": {"train": 2, "test": 1},
+        "missing_value_count": 1,
+        "n_channels": 2,
+        "series_length": {"min": 2, "max": 4, "mean": 16 / 6},
+    }
+
+
 def test_simultaneous_writers_keep_both_rows(tmp_path, monkeypatch):
     """Let both commands build rows before either merges into the shared catalogue."""
     data = tmp_path / "data"

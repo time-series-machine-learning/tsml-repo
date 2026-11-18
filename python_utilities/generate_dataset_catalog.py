@@ -196,7 +196,7 @@ def verify_dataset_files(pairs, record, file_rows, archive_path=None):
 
 @contextmanager
 def open_ts_split(path, loader=None):
-    """Read the header once and decode one case at a time with aeon."""
+    """Read the header once and decode one case at a time."""
     if loader is not None:
         cases, targets, metadata = loader(path)
         if len(cases) != len(targets):
@@ -209,12 +209,25 @@ def open_ts_split(path, loader=None):
 
     with path.open(encoding="utf-8") as stream:
         metadata = _load_header_info(stream)
+        allows_unequal_channels = not (metadata["equallength"] or metadata["timestamps"])
 
         def iter_cases():
             for line in stream:
-                cases, targets, _ = _load_data((line,), metadata)
-                target = float(targets[0]) if metadata["targetlabel"] else targets[0]
-                yield cases[0], target
+                unequal_channels = False
+                if allows_unequal_channels:
+                    *channels, target = line.rstrip().split(":")
+                    unequal_channels = len({channel.count(",") for channel in channels}) > 1
+                if unequal_channels:
+                    # aeon's case arrays require all channels to have the same length.
+                    case = tuple(
+                        np.asarray(channel.replace("?", "NaN").split(","), dtype=float)
+                        for channel in channels
+                    )
+                    target = target.lower().replace("nan", "NaN").replace("?", "NaN")
+                else:
+                    cases, targets, _ = _load_data((line,), metadata)
+                    case, target = cases[0], targets[0]
+                yield case, float(target) if metadata["targetlabel"] else target
 
         yield metadata, iter_cases()
 
@@ -230,6 +243,24 @@ def metadata_task(metadata, path):
     return "classification" if is_classification else "regression"
 
 
+def summarize_case(case, path):
+    """Count channels, samples per channel, and missing values in one case."""
+    if isinstance(case, tuple):
+        channels = tuple(np.asarray(channel) for channel in case)
+        if not channels or any(channel.ndim != 1 for channel in channels):
+            raise ValueError(f"Expected one-dimensional channels in {path}.")
+        lengths = [channel.size for channel in channels]
+        missing = sum(int(np.count_nonzero(np.isnan(channel))) for channel in channels)
+        return len(channels), min(lengths), max(lengths), sum(lengths), missing
+
+    values = np.asarray(case)
+    if values.ndim != 2 or not values.shape[0]:
+        raise ValueError(f"Expected a case with shape (n_channels, n_timepoints) in {path}.")
+    channels, length = values.shape
+    missing = int(np.count_nonzero(np.isnan(values)))
+    return channels, length, length, channels * length, missing
+
+
 def build_dataset_row(dataset_name, concept_id, pair, loader=None):
     """Accumulate dataset statistics without holding a full split in memory."""
     case_counts = {}
@@ -238,7 +269,7 @@ def build_dataset_row(dataset_name, concept_id, pair, loader=None):
     n_channels = None
     min_length = None
     max_length = 0
-    total_length = 0
+    total_samples = 0
     missing_value_count = 0
 
     for split in SPLITS:
@@ -249,26 +280,21 @@ def build_dataset_row(dataset_name, concept_id, pair, loader=None):
             task = metadata_task(metadata, path)
             tasks.add(task)
             for case, target in cases:
-                values = np.asarray(case)
-                if values.ndim != 2 or not values.shape[0]:
-                    raise ValueError(
-                        f"Expected a case with shape (n_channels, n_timepoints) in {path}."
-                    )
-                channels, length = values.shape
+                channels, shortest, longest, samples, missing = summarize_case(case, path)
                 if n_channels is None:
                     n_channels = channels
                 if channels != n_channels or (metadata.get("univariate") and channels != 1):
                     raise ValueError(f"Inconsistent channel count in {path}.")
                 if split_length is None:
-                    split_length = length
-                if metadata.get("equallength") and length != split_length:
+                    split_length = shortest
+                if metadata.get("equallength") and not shortest == longest == split_length:
                     raise ValueError(f"Cases have unequal lengths in equal-length split {path}.")
 
                 case_counts[split] += 1
-                min_length = length if min_length is None else min(min_length, length)
-                max_length = max(max_length, length)
-                total_length += length
-                missing_value_count += int(np.count_nonzero(np.isnan(values)))
+                min_length = shortest if min_length is None else min(min_length, shortest)
+                max_length = max(max_length, longest)
+                total_samples += samples
+                missing_value_count += missing
                 if task == "classification":
                     classes.add(target)
 
@@ -285,7 +311,7 @@ def build_dataset_row(dataset_name, concept_id, pair, loader=None):
         "series_length": {
             "min": min_length,
             "max": max_length,
-            "mean": total_length / sum(case_counts.values()),
+            "mean": total_samples / (n_channels * sum(case_counts.values())),
         },
     }
     if task == "classification":
