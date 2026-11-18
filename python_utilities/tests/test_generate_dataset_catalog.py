@@ -99,6 +99,7 @@ def test_builds_classification_statistics_from_both_splits(tmp_path):
             "n_channels": 2,
             "n_classes": 2,
             "series_length": {"min": 2, "max": 4, "mean": 3.0},
+            "unequal_case_lengths": True,
         },
         "task": "classification",
     }
@@ -199,6 +200,9 @@ def test_main_looks_up_concept_and_writes_discovered_rows(tmp_path):
     assert [row["dataset_name"] for row in rows] == ["Adiac", "Adiac_eq"]
     assert {row["concept_id"] for row in rows} == {11179787}
     assert all(row["statistics"]["case_counts"] == {"train": 2, "test": 2} for row in rows)
+    for row in rows:
+        assert "unequal_case_lengths" not in row["statistics"]
+        assert "unequal_channel_lengths" not in row["statistics"]
 
 
 @pytest.mark.parametrize(
@@ -312,6 +316,64 @@ def test_equal_length_validation_covers_consecutive_cases(tmp_path):
 
     with pytest.raises(ValueError, match="unequal lengths in equal-length split"):
         catalog.build_dataset_row("Adiac", 1, pair)
+
+
+@pytest.mark.parametrize(
+    ("second_case", "unequal_cases"),
+    [("1,2,3,4:5,6:62.5", False), ("1,2:3,4,5,6:62.5", True)],
+)
+def test_regression_statistics_include_channels_of_different_lengths(
+    tmp_path, second_case, unequal_cases
+):
+    """Distinguish stable channel lengths from changes across cases."""
+    pair = make_pair(tmp_path, "PPGDalia")
+    header = "@univariate false\n@equalLength false\n@targetLabel true\n@data\n"
+    pair["train"].write_text(
+        header + f"1,?,3,4:5,6:60.5\n{second_case}\n", encoding="utf-8"
+    )
+    pair["test"].write_text(header + "1,2,3,4:5,6:65.5\n", encoding="utf-8")
+
+    row = catalog.build_dataset_row("PPGDalia", 1, pair)
+
+    assert row["task"] == "regression"
+    expected = {
+        "case_counts": {"train": 2, "test": 1},
+        "missing_value_count": 1,
+        "n_channels": 2,
+        "series_length": {"min": 2, "max": 4, "mean": 3.0},
+        "unequal_channel_lengths": True,
+    }
+    if unequal_cases:
+        expected["unequal_case_lengths"] = True
+    assert row["statistics"] == expected
+
+
+@pytest.mark.parametrize(
+    ("minimum", "maximum", "flags"),
+    [
+        (4, 4, {"unequal_case_lengths": True}),
+        (4, 4, {"unequal_channel_lengths": True}),
+        (2, 4, {}),
+        (4, 2, {}),
+    ],
+)
+def test_rejects_length_flags_inconsistent_with_range(minimum, maximum, flags):
+    """Require a varying range and at least one true flag to agree."""
+    row = {
+        "dataset_name": "Example",
+        "statistics": {"series_length": {"min": minimum, "max": maximum}, **flags},
+    }
+
+    with pytest.raises(ValueError, match="inconsistent with its series length range"):
+        catalog.validate_length_flags(row)
+
+
+def test_catalogued_length_flags_match_reported_lengths():
+    """Check the generated catalogue against the same rule as the generator."""
+    rows = catalog.read_jsonl(catalog.DATASET_CATALOG_PATH)
+    assert rows
+    for row in rows:
+        catalog.validate_length_flags(row)
 
 
 def test_simultaneous_writers_keep_both_rows(tmp_path, monkeypatch):
