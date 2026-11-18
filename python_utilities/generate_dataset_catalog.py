@@ -244,21 +244,36 @@ def metadata_task(metadata, path):
 
 
 def summarize_case(case, path):
-    """Count channels, samples per channel, and missing values in one case."""
+    """Return the channel lengths and missing-value count for one case."""
     if isinstance(case, tuple):
         channels = tuple(np.asarray(channel) for channel in case)
         if not channels or any(channel.ndim != 1 for channel in channels):
             raise ValueError(f"Expected one-dimensional channels in {path}.")
-        lengths = [channel.size for channel in channels]
+        lengths = tuple(channel.size for channel in channels)
         missing = sum(int(np.count_nonzero(np.isnan(channel))) for channel in channels)
-        return len(channels), min(lengths), max(lengths), sum(lengths), missing
+        return lengths, missing
 
     values = np.asarray(case)
     if values.ndim != 2 or not values.shape[0]:
         raise ValueError(f"Expected a case with shape (n_channels, n_timepoints) in {path}.")
     channels, length = values.shape
     missing = int(np.count_nonzero(np.isnan(values)))
-    return channels, length, length, channels * length, missing
+    return (length,) * channels, missing
+
+
+def validate_length_flags(row):
+    """Check that the length flags agree with the recorded range."""
+    statistics = row["statistics"]
+    lengths = statistics["series_length"]
+    minimum, maximum = lengths["min"], lengths["max"]
+    unequal = statistics.get("unequal_case_lengths", False) or statistics.get(
+        "unequal_channel_lengths", False
+    )
+    if minimum > maximum or unequal != (minimum < maximum):
+        raise ValueError(
+            f"{row['dataset_name']} has unequal-length flags inconsistent "
+            "with its series length range."
+        )
 
 
 def build_dataset_row(dataset_name, concept_id, pair, loader=None):
@@ -266,7 +281,9 @@ def build_dataset_row(dataset_name, concept_id, pair, loader=None):
     case_counts = {}
     tasks = set()
     classes = set()
-    n_channels = None
+    reference_lengths = None
+    unequal_case_lengths = False
+    unequal_channel_lengths = False
     min_length = None
     max_length = 0
     total_samples = 0
@@ -280,30 +297,37 @@ def build_dataset_row(dataset_name, concept_id, pair, loader=None):
             task = metadata_task(metadata, path)
             tasks.add(task)
             for case, target in cases:
-                channels, shortest, longest, samples, missing = summarize_case(case, path)
-                if n_channels is None:
-                    n_channels = channels
-                if channels != n_channels or (metadata.get("univariate") and channels != 1):
+                channel_lengths, missing = summarize_case(case, path)
+                if reference_lengths is None:
+                    reference_lengths = channel_lengths
+                channels = len(channel_lengths)
+                if channels != len(reference_lengths) or (
+                    metadata.get("univariate") and channels != 1
+                ):
                     raise ValueError(f"Inconsistent channel count in {path}.")
+                shortest, longest = min(channel_lengths), max(channel_lengths)
                 if split_length is None:
                     split_length = shortest
                 if metadata.get("equallength") and not shortest == longest == split_length:
                     raise ValueError(f"Cases have unequal lengths in equal-length split {path}.")
 
+                unequal_case_lengths |= channel_lengths != reference_lengths
+                unequal_channel_lengths |= shortest != longest
                 case_counts[split] += 1
                 min_length = shortest if min_length is None else min(min_length, shortest)
                 max_length = max(max_length, longest)
-                total_samples += samples
+                total_samples += sum(channel_lengths)
                 missing_value_count += missing
                 if task == "classification":
                     classes.add(target)
 
     if len(tasks) != 1:
         raise ValueError(f"{dataset_name} TRAIN and TEST declare different tasks.")
-    if n_channels is None:
+    if reference_lengths is None:
         raise ValueError("The train/test pair contains no cases.")
 
     task = tasks.pop()
+    n_channels = len(reference_lengths)
     statistics = {
         "case_counts": case_counts,
         "missing_value_count": missing_value_count,
@@ -316,13 +340,19 @@ def build_dataset_row(dataset_name, concept_id, pair, loader=None):
     }
     if task == "classification":
         statistics["n_classes"] = len(classes)
+    if unequal_case_lengths:
+        statistics["unequal_case_lengths"] = True
+    if unequal_channel_lengths:
+        statistics["unequal_channel_lengths"] = True
 
-    return {
+    row = {
         "concept_id": concept_id,
         "dataset_name": dataset_name,
         "statistics": statistics,
         "task": task,
     }
+    validate_length_flags(row)
+    return row
 
 
 def merge_dataset_rows(existing_rows, generated_rows, dataset_name, replace=False):

@@ -62,6 +62,14 @@
         },
         "series_length": {
           "$ref": "#/$defs/series_length"
+        },
+        "unequal_case_lengths": {
+          "default": false,
+          "type": "boolean"
+        },
+        "unequal_channel_lengths": {
+          "default": false,
+          "type": "boolean"
         }
       },
       "required": [
