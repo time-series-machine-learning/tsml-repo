@@ -302,7 +302,8 @@
 {"concept_id": 18499243, "is_current": true, "record_id": 18499244, "record_url": "https://zenodo.org/records/18499244", "title": "NewsTitleSentiment_disc"}
 {"concept_id": 18499291, "is_current": true, "record_id": 18499292, "record_url": "https://zenodo.org/records/18499292", "title": "Opportunity"}
 {"concept_id": 18499362, "is_current": true, "record_id": 18499363, "record_url": "https://zenodo.org/records/18499363", "title": "PAMAP2"}
-{"concept_id": 18499659, "is_current": true, "record_id": 18499660, "record_url": "https://zenodo.org/records/18499660", "title": "PPGDalia_disc"}
+{"concept_id": 18499659, "is_current": false, "record_id": 18499660, "record_url": "https://zenodo.org/records/18499660", "title": "PPGDalia_disc"}
+{"concept_id": 18499659, "is_current": true, "record_id": 24354112, "record_url": "https://zenodo.org/records/24354112", "title": "PPGDalia_disc"}
 {"concept_id": 18499795, "is_current": true, "record_id": 18499796, "record_url": "https://zenodo.org/records/18499796", "title": "S2Agri-10pc-17"}
 {"concept_id": 18499799, "is_current": true, "record_id": 18499800, "record_url": "https://zenodo.org/records/18499800", "title": "S2Agri-10pc-34"}
 {"concept_id": 18500109, "is_current": true, "record_id": 18500110, "record_url": "https://zenodo.org/records/18500110", "title": "STEW"}
@@ -354,7 +355,7 @@
 {"concept_id": 18511356, "is_current": true, "record_id": 18511357, "record_url": "https://zenodo.org/records/18511357", "title": "UIPRMD-SSIER-C"}
 {"concept_id": 18511360, "is_current": true, "record_id": 18511361, "record_url": "https://zenodo.org/records/18511361", "title": "UIPRMD-SSS-C"}
 {"concept_id": 18511362, "is_current": true, "record_id": 18511363, "record_url": "https://zenodo.org/records/18511363", "title": "UIPRMD-STS-C"}
-{"concept_id": 18641020, "is_current": true, "record_id": 18641021, "record_url": "https://zenodo.org/records/18641021", "title": "TSML Imbalanced Univariate Time Series Classification Archive"}
+{"concept_id": 18641020, "is_current": true, "record_id": 18641021, "record_url": "https://zenodo.org/records/18641021", "title": "TSML Imbalanced Univariate Time Series Classification Archive 2025"}
 {"concept_id": 18681267, "is_current": true, "record_id": 18681268, "record_url": "https://zenodo.org/records/18681268", "title": "WhaleSounds"}
 {"concept_id": 18681279, "is_current": true, "record_id": 18681280, "record_url": "https://zenodo.org/records/18681280", "title": "Traffic"}
 {"concept_id": 18681320, "is_current": true, "record_id": 18681321, "record_url": "https://zenodo.org/records/18681321", "title": "TimeSen2Crop"}

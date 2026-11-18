@@ -1,3 +1,4 @@
+PPGDalia_disc: 24354112
 AconityMINIPrinterLarge: 24305012
 AconityMINIPrinterSmall: 24304987
 TSML Multivariate Time Series Classification Archive 2018: 24281548
@@ -23,7 +24,7 @@ FruitFlies: 18682632
 AudioMNIST-DS: 18683394
 CornellWhaleChallenge: 18683381
 AudioMNIST: 18683396
-TSML Imbalanced Univariate Time Series Classification Archive: 18641021
+TSML Imbalanced Univariate Time Series Classification Archive 2025: 18641021
 IRDS-EFL: 18510498
 IRDS-EFR: 18510501
 IRDS-SAL: 18510505
@@ -93,7 +94,6 @@ NewsHeadlineSentiment_disc: 18499242
 NewsTitleSentiment_disc: 18499244
 Opportunity: 18499292
 PAMAP2: 18499363
-PPGDalia_disc: 18499660
 LenDB: 18499169
 S2Agri-10pc-34: 18499800
 S2Agri-10pc-17: 18499796
