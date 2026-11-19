@@ -7,6 +7,10 @@ import pytest
 from jsonschema import Draft202012Validator, FormatChecker, ValidationError
 
 from python_utilities.generate_catalog import RECORDS_CATALOG_PATH
+from python_utilities.generate_dataset_catalog import (
+    DATASET_CATALOG_PATH,
+    validate_length_flags,
+)
 from python_utilities.generate_zenodo_snapshots import SCHEMA_DIR
 
 
@@ -86,6 +90,22 @@ def test_example_dataset_rows_match_the_dataset_schema():
     validator = load_validator("dataset.schema.json")
 
     assert len(rows) == 3
+    for row in rows:
+        validator.validate(row)
+        validate_length_flags(row)
+
+
+def test_generated_dataset_catalog_matches_the_dataset_schema():
+    """Validate every committed dataset row against the dataset schema."""
+    rows = [
+        json.loads(line)
+        for line in DATASET_CATALOG_PATH.read_text(
+            encoding="utf-8"
+        ).splitlines()
+    ]
+    validator = load_validator("dataset.schema.json")
+
+    assert rows
     for row in rows:
         validator.validate(row)
 
