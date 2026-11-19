@@ -3,3 +3,4 @@ filelock
 jsonschema
 pre-commit
 pytest
+pyyaml

@@ -1,0 +1,4 @@
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["python_utilities/tests"]
+norecursedirs = ["local", ".venv", ".git", "__pycache__", ".pytest_cache"]
