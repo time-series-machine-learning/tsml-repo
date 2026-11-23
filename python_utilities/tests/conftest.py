@@ -4,7 +4,7 @@ import socket
 
 import pytest
 
-from python_utilities import generate_zenodo_record_lists
+from python_utilities import generate_zenodo_record_lists, zenodo_maintenance
 
 
 @pytest.fixture(autouse=True)
@@ -14,6 +14,16 @@ def isolate_credentials_and_network(tmp_path, monkeypatch):
         generate_zenodo_record_lists,
         "TOKEN_PATH",
         tmp_path / ".missing_zenodo_token",
+    )
+    monkeypatch.setattr(
+        zenodo_maintenance,
+        "PRODUCTION_TOKEN_PATH",
+        tmp_path / ".missing_zenodo_token",
+    )
+    monkeypatch.setattr(
+        zenodo_maintenance,
+        "SANDBOX_TOKEN_PATH",
+        tmp_path / ".missing_zenodo_sandbox_token",
     )
 
     def blocked_network(*args, **kwargs):
