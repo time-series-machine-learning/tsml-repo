@@ -1,0 +1,667 @@
+/* TSML Archive portal styles (PyData Sphinx Theme light & dark compatible) */
+
+:root {
+  --pst-header-height: 4rem;
+}
+
+/* Explicit theme selectors match pydata-sphinx-theme specificity (0,1,1) */
+html[data-theme="light"] {
+  --pst-color-primary: #0369a1;
+  --pst-color-primary-text: #ffffff;
+  --pst-color-primary-highlight: #075985;
+  --pst-color-link: #0369a1;
+  --pst-color-link-hover: #075985;
+  --pst-color-text-base: #0f172a;
+  --pst-color-text-muted: #475569;
+  --pst-color-inline-code: #0f172a;
+  --pst-color-table-row-hover-bg: #eef2f6;
+  --sd-color-primary: #0369a1;
+  --sd-color-primary-text: #ffffff;
+}
+
+html[data-theme="dark"] {
+  --pst-color-primary: #38bdf8;
+  --pst-color-primary-text: #0f172a;
+  --pst-color-primary-highlight: #7dd3fc;
+  --pst-color-link: #38bdf8;
+  --pst-color-link-hover: #7dd3fc;
+  --pst-color-text-base: #e2e8f0;
+  --pst-color-text-muted: #a3b1c2;
+  --pst-color-inline-code: #e2e8f0;
+  --pst-color-table-row-hover-bg: #2d3748;
+  --sd-color-primary: #38bdf8;
+  --sd-color-primary-text: #0f172a;
+}
+
+/* Hide only the outer Sphinx H1 on the home page (the hero renders the visual title) */
+.tsml-home-page > h1 {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Balanced, centered container across the entire site — zero lopsided gutters */
+.bd-page-width {
+  max-width: min(94vw, 94rem) !important;
+  margin-inline: auto !important;
+}
+
+.bd-header .navbar-brand {
+  height: auto !important;
+  max-height: none !important;
+  padding-block: 0.2rem !important;
+  margin-right: 1.25rem !important;
+}
+
+.bd-header .navbar-brand img,
+.bd-header .logo__image {
+  height: 52px !important;
+  max-height: 52px !important;
+  width: auto !important;
+}
+
+/* Hide empty left primary sidebar slot completely */
+.bd-sidebar-primary:empty {
+  display: none !important;
+}
+
+/* Generous, well-balanced article width & vertical breathing room */
+.bd-main .bd-content .bd-article-container {
+  max-width: 78rem !important;
+  padding-inline: 1.25rem !important;
+}
+
+.bd-main .bd-content .bd-article-container .bd-article {
+  padding-inline: 0.5rem !important;
+  padding-top: 1.5rem !important;
+  padding-bottom: 3rem !important;
+}
+
+.bd-main .bd-content:not(:has(.bd-sidebar-secondary)) .bd-article-container {
+  max-width: 100% !important;
+}
+
+/* Global section, table, and code rhythm */
+.bd-article section > h2 {
+  margin-top: 2.75rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.bd-article section > h3 {
+  margin-top: 1.85rem !important;
+  margin-bottom: 0.6rem !important;
+  font-size: 1.15rem !important;
+}
+
+.bd-article .pst-scrollable-table-container {
+  margin-block: 1rem 2rem !important;
+}
+
+.bd-article div.highlight {
+  margin-block: 1rem 1.35rem !important;
+}
+
+.bd-article div.highlight pre {
+  line-height: 1.55 !important;
+  border-radius: 0.5rem !important;
+}
+
+.bd-article a code.docutils.literal {
+  color: var(--pst-color-link) !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Home Page Centered Portal Hero & Overview Card Grid                        */
+/* -------------------------------------------------------------------------- */
+
+.tsml-hero {
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  padding: 2.75rem 2.5rem 2rem;
+  margin: 0.25rem 0 2.5rem;
+  border: 1px solid var(--pst-color-border);
+  border-radius: 1rem;
+  background: linear-gradient(
+    135deg,
+    var(--pst-color-surface) 0%,
+    var(--pst-color-on-background) 100%
+  );
+}
+
+@media (max-width: 768px) {
+  .tsml-hero {
+    padding: 2rem 1.35rem 1.5rem;
+  }
+}
+
+.tsml-hero-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  pointer-events: none;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  border: 0 !important;
+}
+
+html[data-theme="light"] .tsml-hero-backdrop {
+  opacity: 0.65;
+}
+
+.tsml-hero-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 52rem;
+  margin-inline: auto;
+}
+
+.tsml-hero-title {
+  margin: 0 0 0.85rem;
+  font-size: clamp(2rem, 3.2vw, 2.75rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  color: var(--pst-color-text-base);
+}
+
+html[data-theme="dark"] .tsml-hero-title,
+html[data-theme="dark"] .tsml-hero-metric-num {
+  color: #f8fafc;
+}
+
+.tsml-hero-lead {
+  font-size: 1.06rem;
+  line-height: 1.65;
+  color: var(--pst-color-text-muted);
+  margin: 0 auto 1.65rem;
+  max-width: 42rem;
+}
+
+.tsml-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.85rem;
+  margin-bottom: 2rem;
+}
+
+/* Integrated 4-column metric bar along bottom of centered hero */
+.tsml-hero-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem 1.5rem;
+  padding-top: 1.35rem;
+  border-top: 1px solid var(--pst-color-border);
+}
+
+@media (max-width: 640px) {
+  .tsml-hero-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.tsml-hero-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tsml-hero-metric-num {
+  font-size: 1.55rem;
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--pst-color-text-base);
+  font-variant-numeric: tabular-nums;
+}
+
+.tsml-hero-metric-label {
+  margin-top: 0.22rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--pst-color-text-muted);
+}
+
+.tsml-cta {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.65rem 1.35rem;
+  border-radius: 0.55rem;
+  font-size: 0.93rem;
+  font-weight: 600;
+  text-decoration: none !important;
+  transition: transform 0.14s ease, border-color 0.14s ease, opacity 0.14s ease;
+}
+
+.tsml-cta:hover {
+  transform: translateY(-1px);
+}
+
+.tsml-cta-primary {
+  background: var(--pst-color-primary);
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .tsml-cta-primary {
+  color: #0f172a !important;
+}
+
+.tsml-cta-secondary {
+  background: var(--pst-color-background);
+  color: var(--pst-color-text-base) !important;
+  border: 1px solid var(--pst-color-border);
+}
+
+.tsml-cta-secondary:hover {
+  border-color: var(--pst-color-primary);
+}
+
+/* Align sphinx-design grids flush with surrounding content & give cards room */
+.bd-content .sd-container-fluid {
+  padding-inline: 0 !important;
+  margin-block: 0 2.75rem !important;
+}
+
+.bd-content .sd-card {
+  border: 1px solid var(--pst-color-border) !important;
+  border-radius: 0.8rem !important;
+  transition: border-color 0.15s ease, transform 0.15s ease !important;
+}
+
+.bd-content .sd-card.sd-card-hover:hover {
+  border-color: var(--pst-color-primary) !important;
+  transform: translateY(-2px) !important;
+}
+
+.bd-content .sd-card .sd-card-body {
+  padding: 1.45rem 1.6rem !important;
+}
+
+.bd-content .sd-card .sd-card-title {
+  font-size: 1.06rem;
+  margin-bottom: 0.6rem !important;
+}
+
+.bd-content .sd-card .sd-card-text {
+  font-size: 0.93rem;
+  line-height: 1.6;
+  color: var(--pst-color-text-muted);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Dataset Pages & Collapsible BibTeX                                         */
+/* -------------------------------------------------------------------------- */
+
+.tsml-back-link {
+  margin-bottom: 0.65rem !important;
+  font-size: 0.9rem;
+}
+
+.tsml-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.9rem 0 1.2rem !important;
+}
+
+.tsml-badge-row .sd-badge {
+  padding: 0.42em 0.75em !important;
+  font-size: 0.78rem !important;
+  border-radius: 0.375rem !important;
+  top: 0 !important;
+}
+
+.tsml-badge-row .sd-badge.sd-bg-light {
+  background-color: var(--pst-color-surface) !important;
+  color: var(--pst-color-text-base) !important;
+  border: 1px solid var(--pst-color-border) !important;
+}
+
+/* Remove cramped double-border look on sphinx-design code tabs */
+.bd-content .sd-tab-set {
+  margin: 1rem 0 2rem !important;
+}
+
+.bd-content .sd-tab-set .sd-tab-content {
+  border: 1px solid var(--pst-color-border) !important;
+  border-radius: 0 0.5rem 0.5rem 0.5rem !important;
+  padding: 1rem !important;
+}
+
+.bd-content .sd-tab-set .sd-tab-content div.highlight {
+  margin: 0 !important;
+}
+
+/* Collapsible BibTeX blocks under benchmark references */
+.tsml-bibtex {
+  margin: 0.55rem 0 1.6rem;
+}
+
+.tsml-bibtex > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.28rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--pst-color-link);
+  background: var(--pst-color-surface);
+  border: 1px solid var(--pst-color-border);
+  border-radius: 0.4rem;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  transition: border-color 0.14s ease;
+}
+
+.tsml-bibtex > summary::-webkit-details-marker {
+  display: none;
+}
+
+.tsml-bibtex > summary::before {
+  content: "▸";
+  font-size: 0.75rem;
+  transition: transform 0.14s ease;
+}
+
+.tsml-bibtex[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.tsml-bibtex > summary:hover {
+  border-color: var(--pst-color-primary);
+}
+
+.tsml-bibtex div.highlight {
+  margin-top: 0.65rem !important;
+  margin-bottom: 0 !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Interactive Dataset Catalogue                                              */
+/* -------------------------------------------------------------------------- */
+
+.tsml-controls-panel {
+  border: 1px solid var(--pst-color-border);
+  border-radius: 0.85rem;
+  background: var(--pst-color-surface);
+  padding: 1.35rem 1.5rem;
+  margin: 1.5rem 0 1.25rem;
+}
+
+/* Balanced 4x2 grid on desktop (8 controls total -> zero orphan rows) */
+.tsml-controls-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem 1.25rem;
+  align-items: end;
+}
+
+@media (max-width: 1024px) {
+  .tsml-controls-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .tsml-controls-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tsml-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.tsml-field label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--pst-color-text-muted);
+  margin: 0;
+}
+
+.tsml-field input,
+.tsml-field select {
+  width: 100%;
+  box-sizing: border-box;
+  height: 2.4rem;
+  padding: 0.42rem 0.7rem;
+  font-size: 0.88rem;
+  border: 1px solid var(--pst-color-border);
+  border-radius: 0.45rem;
+  background: var(--pst-color-background);
+  color: var(--pst-color-text-base);
+}
+
+.tsml-field input:focus,
+.tsml-field select:focus {
+  outline: 2px solid var(--pst-color-primary);
+  outline-offset: 1px;
+}
+
+/* Collapsible numeric range drawer */
+.tsml-range-details {
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--pst-color-border);
+}
+
+.tsml-range-details summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--pst-color-link);
+  user-select: none;
+}
+
+.tsml-range-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem 1.25rem;
+  margin-top: 0.85rem;
+}
+
+@media (max-width: 768px) {
+  .tsml-range-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tsml-range-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+/* Toolbar row */
+.tsml-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.15rem 0;
+}
+
+.tsml-result-count {
+  font-size: 0.93rem;
+  color: var(--pst-color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.tsml-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.tsml-btn {
+  padding: 0.42rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border: 1px solid var(--pst-color-border);
+  border-radius: 0.45rem;
+  background: var(--pst-color-surface);
+  color: var(--pst-color-text-base);
+  cursor: pointer;
+  transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+.tsml-btn:hover {
+  border-color: var(--pst-color-primary);
+  background: var(--pst-color-on-background);
+}
+
+/* Data Table */
+.tsml-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--pst-color-border);
+  border-radius: 0.75rem;
+  background: var(--pst-color-background);
+}
+
+.tsml-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  font-variant-numeric: tabular-nums;
+  margin: 0 !important;
+}
+
+.tsml-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--pst-color-surface);
+  color: var(--pst-color-text-base);
+  font-weight: 700;
+  padding: 0.75rem 0.85rem;
+  border-bottom: 2px solid var(--pst-color-border);
+  white-space: nowrap;
+  text-align: left;
+}
+
+.tsml-table thead th.tsml-num,
+.tsml-table tbody td.tsml-num {
+  text-align: right;
+}
+
+.tsml-sort-btn {
+  all: unset;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 700;
+  color: inherit;
+}
+
+.tsml-sort-btn:hover {
+  color: var(--pst-color-primary);
+}
+
+.tsml-sort-indicator {
+  font-size: 0.72rem;
+  color: var(--pst-color-primary);
+}
+
+.tsml-table tbody tr {
+  border-bottom: 1px solid var(--pst-color-border);
+}
+
+.tsml-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.tsml-table tbody tr:hover {
+  background: var(--pst-color-surface);
+}
+
+.tsml-table tbody td {
+  padding: 0.62rem 0.85rem;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.tsml-dataset-link {
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--pst-color-link);
+}
+
+.tsml-dataset-link:hover {
+  text-decoration: underline;
+}
+
+/* Compact inline pills (WCAG AA contrast in both light & dark modes) */
+.tsml-pill {
+  display: inline-block;
+  padding: 0.12rem 0.48rem;
+  margin-left: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 999px;
+  border: 1px solid var(--pst-color-border);
+  background: var(--pst-color-surface);
+  color: var(--pst-color-text-muted);
+  vertical-align: middle;
+}
+
+.tsml-pill-warn {
+  color: #92400e;
+  border-color: rgba(180, 83, 9, 0.4);
+  background: rgba(245, 158, 11, 0.12);
+}
+
+html[data-theme="dark"] .tsml-pill-warn {
+  color: #fbbf24;
+  border-color: rgba(251, 191, 36, 0.38);
+  background: rgba(251, 191, 36, 0.1);
+}
+
+.tsml-pill-cls {
+  margin-left: 0;
+  color: var(--pst-color-primary);
+  border-color: color-mix(in srgb, var(--pst-color-primary) 35%, transparent);
+}
+
+.tsml-pill-reg {
+  margin-left: 0;
+  color: #b45309;
+  border-color: rgba(180, 83, 9, 0.38);
+  background: rgba(245, 158, 11, 0.08);
+}
+
+html[data-theme="dark"] .tsml-pill-reg {
+  color: #fbbf24;
+  border-color: rgba(251, 191, 36, 0.35);
+  background: var(--pst-color-surface);
+}
+
+.tsml-muted {
+  color: var(--pst-color-text-muted);
+  opacity: 0.75;
+}
+
+.tsml-empty {
+  padding: 2.5rem;
+  text-align: center;
+  color: var(--pst-color-text-muted);
+}
+
+.tsml-loading {
+  padding: 1.5rem;
+  color: var(--pst-color-text-muted);
+}
