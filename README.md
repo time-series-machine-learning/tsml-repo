@@ -1,16 +1,30 @@
 # Time Series Machine Learning Archive
 
-Browse and download published datasets from the [TSML community on Zenodo](https://zenodo.org/communities/tsml/records). Use the [issue tracker](https://github.com/time-series-machine-learning/tsml-repo/issues/new/choose) to suggest a dataset, report an archive problem, or give feedback on the website.
+**[TSML Archive Website](https://tsml-archive.readthedocs.io/)** · **[timeseriesclassification.com](https://www.timeseriesclassification.com/)** · **[TSML on Zenodo](https://zenodo.org/communities/tsml/records)**
 
-## Load and classify a dataset with aeon
+Catalogue, benchmark dataset lists, and issue tracker for the **Time Series Machine Learning Archive** — standardized datasets for **classification**, **extrinsic regression**, and **clustering** published openly in the [TSML Zenodo community](https://zenodo.org/communities/tsml/records) as predefined `TRAIN` and `TEST` splits in `.ts` format.
 
-Install [aeon](https://www.aeon-toolkit.org/).
+- Browse, filter, and export dataset metadata in the **[Dataset Catalogue](https://tsml-archive.readthedocs.io/en/latest/catalogue.html)** or on **[timeseriesclassification.com](https://www.timeseriesclassification.com/)**.
+- Download standard benchmark identifier lists and bulk ZIP links on **[Benchmarks & Bulk Archives](https://tsml-archive.readthedocs.io/en/latest/benchmarks.html)** (maintained in [`archive_lists/`](archive_lists/README.md)).
+- Suggest a dataset, report a data or metadata problem, or share feedback on the website via the **[issue tracker](https://github.com/time-series-machine-learning/tsml-repo/issues/new/choose)**.
+
+## Repository Structure
+
+| Directory | Contents |
+| --- | --- |
+| [`archive_lists/`](archive_lists/README.md) | Plain-text dataset identifier lists (`.txt`) for standard evaluation benchmarks, plus benchmark references and BibTeX. |
+| [`record_lists/`](record_lists/README.md) | Record membership lists grouping Zenodo records by task, subset, and thematic domain collection. |
+| [`manifest/`](manifest/) | Canonical JSONL catalogues and Zenodo version/file snapshots (`records.jsonl`, `datasets.jsonl`, `zenodo_versions.jsonl`, `zenodo_files.jsonl`). |
+| [`docs/`](docs/) | Sphinx source for the [TSML Archive website](https://tsml-archive.readthedocs.io/). |
+| [`python_utilities/`](python_utilities/README.md) | Maintainer CLI utilities for Zenodo inventory refreshes, dataset statistics, read-only audits, and website generation. |
+
+## Quick Start with `aeon`
+
+Install [`aeon`](https://www.aeon-toolkit.org/) and evaluate HIVE-COTE v2 on the predefined `GunPoint` splits (fetched automatically from Zenodo and cached in `extract_path`):
 
 ```sh
 python -m pip install "aeon>=1.4.0"
 ```
-
-Use the predefined TRAIN and TEST splits of GunPoint to train HIVE-COTE v2 (HC2) and measure its accuracy on the test split. The loader can fetch missing archive files from Zenodo and reuse the copies in `extract_path`.
 
 ```python
 from aeon.classification.hybrid import HIVECOTEV2
@@ -27,10 +41,9 @@ print(f"Training data shape (cases, channels, time points): {X_train.shape}")
 print(f"Test accuracy: {classifier.score(X_test, y_test):.1%}")
 ```
 
-## Citing the archive
+See **[Loading & Citing Data](https://tsml-archive.readthedocs.io/en/latest/usage.html)** for loading extrinsic regression problems (`load_regression`), preprocessed variants (`load_equal_length=True` / `load_no_missing=True`), and ZIP-packaged datasets.
 
-If you use the archive in your research, please cite the relevant archive paper and/or dataset.
+## Citing & Licences
 
-## Licence
-
-The code and documentation in this repository are distributed under the [BSD 3-Clause License](LICENSE). Consult each Zenodo record for the terms that apply to its data.
+- If you use datasets or benchmark lists from the archive in your research, please cite the relevant [benchmark or collection publication](archive_lists/README.md#references) and/or original dataset source.
+- Repository code, manifests, and documentation are distributed under the [BSD 3-Clause License](LICENSE). Consult each Zenodo record for the terms that apply to its data.
