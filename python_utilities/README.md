@@ -16,6 +16,7 @@ See [`AGENTS.md`](../AGENTS.md) for repository safety boundaries:
 | [`refresh_zenodo_inventories.py`](refresh_zenodo_inventories.py) | Single-pass anonymous refresh of `zenodo_records/*`, `manifest/zenodo_versions.jsonl`, `manifest/zenodo_files.jsonl`, `manifest/snapshot.jsonl`, and `manifest/records.jsonl`, with a follow-up action checklist. |
 | [`generate_dataset_catalog.py`](generate_dataset_catalog.py) | Verify local `.ts` splits (or `--archive` `.zip` releases) against `manifest/zenodo_files.jsonl` sizes/checksums and compute `manifest/datasets.jsonl` statistics. |
 | [`audit_zenodo_records.py`](audit_zenodo_records.py) | Read-only live audit comparing public Zenodo versions, files, licenses, creators, and keywords against repository manifests and `record_lists/*`. Also runs weekly via [`.github/workflows/zenodo-audit.yml`](../.github/workflows/zenodo-audit.yml). |
+| [`build_website_content.py`](build_website_content.py) | Generate per-dataset MyST pages (`docs/datasets/*.md`), benchmark tables, and `docs/_static/data/catalogue.json` during Sphinx builds. |
 | [`sync_zenodo_tags.py`](sync_zenodo_tags.py) | Compute expected dataset keywords from `manifest/records.jsonl` + `manifest/datasets.jsonl`, preview diffs read-only, and publish deltas with `--apply`. |
 | [`add_zenodo_tags.py`](add_zenodo_tags.py) / [`remove_zenodo_tags.py`](remove_zenodo_tags.py) | Preview or apply targeted keyword additions or removals for a record list or `--record` targets. |
 | [`replace_zenodo_creators.py`](replace_zenodo_creators.py) | Preview or replace the `creators` list on selected Zenodo records. |
@@ -84,3 +85,13 @@ python -m python_utilities.update_zenodo_descriptions \
 ```
 
 To test mutations against `sandbox.zenodo.org` using `.zenodo_sandbox_token`, pass `--sandbox`. If a previous interrupted run left an unedited draft session open (`state='inprogress'`), pass `--discard-existing-edit` alongside `--apply`.
+
+### 4. Build and preview the website locally
+
+Install documentation dependencies (`pip install -r requirements-docs.txt`), build with warnings treated as errors, and serve locally:
+
+```sh
+python -m sphinx -W --keep-going -b html docs docs/_build/html
+python -m http.server --directory docs/_build/html 8000
+```
+

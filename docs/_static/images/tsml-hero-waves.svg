@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="1200" height="360" preserveAspectRatio="xMidYMid slice" role="img" aria-hidden="true">
+  <defs>
+    <!-- Attenuate opacity gently across the center so centered hero text stays crisp -->
+    <linearGradient id="portal-crimson" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#f43f5e" stop-opacity="0.08"/>
+      <stop offset="18%" stop-color="#e11d48" stop-opacity="0.55"/>
+      <stop offset="50%" stop-color="#fb7185" stop-opacity="0.16"/>
+      <stop offset="82%" stop-color="#e11d48" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#f43f5e" stop-opacity="0.08"/>
+    </linearGradient>
+    <linearGradient id="portal-crimson-echo" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#fda4af" stop-opacity="0.04"/>
+      <stop offset="20%" stop-color="#f43f5e" stop-opacity="0.26"/>
+      <stop offset="50%" stop-color="#fda4af" stop-opacity="0.08"/>
+      <stop offset="80%" stop-color="#f43f5e" stop-opacity="0.26"/>
+      <stop offset="100%" stop-color="#fda4af" stop-opacity="0.04"/>
+    </linearGradient>
+    <linearGradient id="portal-cyan" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.08"/>
+      <stop offset="18%" stop-color="#0284c7" stop-opacity="0.58"/>
+      <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.16"/>
+      <stop offset="82%" stop-color="#0284c7" stop-opacity="0.58"/>
+      <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0.08"/>
+    </linearGradient>
+    <linearGradient id="portal-cyan-echo" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#7dd3fc" stop-opacity="0.04"/>
+      <stop offset="20%" stop-color="#0ea5e9" stop-opacity="0.26"/>
+      <stop offset="50%" stop-color="#7dd3fc" stop-opacity="0.08"/>
+      <stop offset="80%" stop-color="#0ea5e9" stop-opacity="0.26"/>
+      <stop offset="100%" stop-color="#7dd3fc" stop-opacity="0.04"/>
+    </linearGradient>
+    <radialGradient id="wing-glow-left" cx="14%" cy="46%" r="36%">
+      <stop offset="0%" stop-color="#f43f5e" stop-opacity="0.11"/>
+      <stop offset="100%" stop-color="#f43f5e" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="wing-glow-right" cx="86%" cy="48%" r="36%">
+      <stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.13"/>
+      <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="360" fill="url(#wing-glow-left)"/>
+  <rect width="1200" height="360" fill="url(#wing-glow-right)"/>
+
+  <!-- Cyan contour family -->
+  <path d="M -20 250 C 150 105, 310 285, 520 175 C 730 65, 920 245, 1220 95" fill="none" stroke="url(#portal-cyan-echo)" stroke-width="1.6"/>
+  <path d="M -20 228 C 160 85, 320 265, 530 155 C 740 45, 930 225, 1220 75" fill="none" stroke="url(#portal-cyan)" stroke-width="2.8"/>
+  <path d="M -20 206 C 170 65, 330 245, 540 135 C 750 28, 940 205, 1220 55" fill="none" stroke="url(#portal-cyan-echo)" stroke-width="1.4"/>
+
+  <!-- Crimson contour family -->
+  <path d="M -20 102 C 165 245, 355 55, 590 178 C 815 295, 985 88, 1220 212" fill="none" stroke="url(#portal-crimson-echo)" stroke-width="1.4"/>
+  <path d="M -20 122 C 175 265, 365 75, 600 198 C 825 315, 995 108, 1220 232" fill="none" stroke="url(#portal-crimson)" stroke-width="2.8"/>
+  <path d="M -20 142 C 185 285, 375 95, 610 218 C 835 335, 1005 128, 1220 252" fill="none" stroke="url(#portal-crimson-echo)" stroke-width="1.6"/>
+</svg>

@@ -396,3 +396,10 @@ def test_github_yaml_configs_are_valid():
         parsed = yaml.safe_load(path.read_text(encoding="utf-8"))
         assert isinstance(parsed, dict), f"{path} did not parse as a YAML mapping."
         assert {"name", "description", "body"} <= set(parsed)
+
+    rtd_path = REPOSITORY_ROOT / ".readthedocs.yaml"
+    if rtd_path.is_file():
+        rtd_config = yaml.safe_load(rtd_path.read_text(encoding="utf-8"))
+        assert isinstance(rtd_config, dict)
+        assert rtd_config.get("version") == 2
+        assert "sphinx" in rtd_config

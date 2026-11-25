@@ -4,6 +4,11 @@ __pycache__/
 .pytest_cache/
 .*.jsonl.lock
 
+docs/_build/
+docs/_generated/
+docs/_static/data/
+docs/datasets/
+
 local/
 .zenodo_token
 .zenodo_sandbox_token
