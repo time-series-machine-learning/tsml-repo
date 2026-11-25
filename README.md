@@ -1,6 +1,6 @@
 # Time Series Machine Learning Archive
 
-**[TSML Archive Website](https://tsml-archive.readthedocs.io/)** · **[timeseriesclassification.com](https://www.timeseriesclassification.com/)** · **[TSML on Zenodo](https://zenodo.org/communities/tsml/records)** · **[Issue Tracker](https://github.com/time-series-machine-learning/tsml-repo/issues/new/choose)**
+**[TSML Archive Website](https://tsml-archive.readthedocs.io/)** · **[timeseriesclassification.com](https://www.timeseriesclassification.com/)** · **[TSML on Zenodo](https://zenodo.org/communities/tsml/records)**
 
 Catalogue, benchmark dataset lists, and issue tracker for the **Time Series Machine Learning Archive** — standardized datasets for **classification**, **extrinsic regression**, and **clustering** published openly in the [TSML Zenodo community](https://zenodo.org/communities/tsml/records) as predefined `TRAIN` and `TEST` splits in `.ts` format.
 
