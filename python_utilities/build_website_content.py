@@ -6,9 +6,7 @@ import shutil
 from collections import defaultdict
 from pathlib import Path
 
-from python_utilities import generate_catalog, generate_dataset_catalog
-
-REPOSITORY_ROOT = generate_catalog.REPOSITORY_ROOT
+REPOSITORY_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_DOCS_DIR = REPOSITORY_ROOT / "docs"
 
 # Structural/task record lists in record_lists/ (all other dataset lists are domain collections)
@@ -52,6 +50,25 @@ TASK_DISPLAY_LABELS = {
     "clustering": "Clustering",
     "forecasting": "Forecasting",
 }
+
+
+def _read_jsonl(path):
+    """Read a UTF-8 JSONL file using only the Python standard library."""
+    return [
+        json.loads(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+
+
+def _dataset_family_names(record_name):
+    """Return canonical base and preprocessed variant names for a record."""
+    return (
+        record_name,
+        f"{record_name}_eq",
+        f"{record_name}_nmv",
+        f"{record_name}_eq_nmv",
+    )
 
 
 def _write_if_changed(path, content):
@@ -479,11 +496,11 @@ def build_website_content(repo_root=REPOSITORY_ROOT, docs_dir=DEFAULT_DOCS_DIR):
     archive_lists_dir = repo_root / "archive_lists"
     descriptions_dir = docs_dir / "descriptions"
 
-    records = generate_catalog.read_jsonl(manifest_dir / "records.jsonl")
-    datasets = generate_dataset_catalog.read_jsonl(manifest_dir / "datasets.jsonl")
-    versions = generate_catalog.read_jsonl(manifest_dir / "zenodo_versions.jsonl")
-    files = generate_catalog.read_jsonl(manifest_dir / "zenodo_files.jsonl")
-    snapshots = generate_catalog.read_jsonl(manifest_dir / "snapshot.jsonl")
+    records = _read_jsonl(manifest_dir / "records.jsonl")
+    datasets = _read_jsonl(manifest_dir / "datasets.jsonl")
+    versions = _read_jsonl(manifest_dir / "zenodo_versions.jsonl")
+    files = _read_jsonl(manifest_dir / "zenodo_files.jsonl")
+    snapshots = _read_jsonl(manifest_dir / "snapshot.jsonl")
 
     latest_snapshot = snapshots[-1] if snapshots else {}
     retrieved_at = latest_snapshot.get("retrieved_at", "")
@@ -583,9 +600,7 @@ def build_website_content(repo_root=REPOSITORY_ROOT, docs_dir=DEFAULT_DOCS_DIR):
         rec_name = rec["name"]
         order_map = {
             name: idx
-            for idx, name in enumerate(
-                generate_dataset_catalog.dataset_family_names(rec_name)
-            )
+            for idx, name in enumerate(_dataset_family_names(rec_name))
         }
         rec_variants = sorted(
             variants_by_concept[cid],

@@ -96,3 +96,14 @@ def test_auto_discovers_collections_and_benchmark_categories():
     assert web.format_collection_label("audio-speech") == "Audio Speech"
     assert web.format_collection_label("ecg") == "ECG"
     assert web.format_benchmark_category("UnivariateClustering") == "Univariate Clustering"
+
+
+def test_website_generator_requires_only_stdlib(monkeypatch):
+    """Ensure docs builds on Read the Docs and CI never require numpy or aeon."""
+    import importlib
+    import sys
+
+    for mod in ("numpy", "aeon", "jsonschema", "filelock"):
+        monkeypatch.setitem(sys.modules, mod, None)
+    reloaded = importlib.reload(web)
+    assert reloaded.REPOSITORY_ROOT.is_dir()
